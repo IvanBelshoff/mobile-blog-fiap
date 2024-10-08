@@ -9,7 +9,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
     aoClicarEmMinhaConta: () => void,
     aoClicarEmSair: () => void
 }) {
-    const { token } = useAuth();
+    const { session } = useAuth();
 
     const isActive = (routeName: string) => {
         const focusedRoute = state.routes[state.index].name;
@@ -28,7 +28,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                 </Text>
             </TouchableOpacity>
 
-            {token ? (
+            {session?.token ? (
                 <TouchableOpacity style={[styles.option, isActive('profile/[id]') && styles.activeOption]} onPress={aoClicarEmMinhaConta}>
                     <Text style={[styles.option, isActive('profile/[id]') && styles.activeOption]}>Minha Conta</Text>
                 </TouchableOpacity>
@@ -47,7 +47,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             </TouchableOpacity>
 
             {/* Opção Sair (se houver token) */}
-            {token && (
+            {session?.token && (
                 <TouchableOpacity style={styles.option} onPress={aoClicarEmSair}>
                     <Text style={styles.optionText}>Sair</Text>
                 </TouchableOpacity>

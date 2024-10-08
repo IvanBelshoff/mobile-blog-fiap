@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomeLayout() {
 
-    const { setPermissoes, setRegras, setToken, setUserId, userId } = useAuth();
+    const { signOut, session } = useAuth();
 
     const handleSearchParams = (filter: string) => {
         router.setParams({ filter: filter });
@@ -31,15 +31,12 @@ export default function HomeLayout() {
                         aoClicarEmMinhaConta={() => {
                             router.push({
                                 pathname: '/profile/[id]',
-                                params: { id: userId || 0 }
+                                params: { id: session?.userId || 0 }
                             });
                         }}
 
                         aoClicarEmSair={() => {
-                            setToken('');
-                            setUserId('');
-                            setPermissoes('');
-                            setRegras('');
+                            signOut();
                             router.push('/')
                         }}
                     />

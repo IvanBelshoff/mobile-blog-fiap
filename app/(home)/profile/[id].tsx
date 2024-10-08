@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
-import * as SecureStore from 'expo-secure-store';
+
 export default function Profile() {
     const { id } = useLocalSearchParams();
     const [usuario, setUsuario] = useState<IUsuarioCompleto | null>(null);
@@ -15,8 +15,6 @@ export default function Profile() {
             const data = await UsuariosService.getById(Number(id)); // Chame o serviço com o ID do usuário
 
             if (data instanceof AxiosError) {
-
-                console.log(data.response);
                 setError(data.message);
                 setLoading(false);
                 return;
@@ -30,11 +28,9 @@ export default function Profile() {
             setLoading(false);
         }
     };
-    const [teste, setTeste] = useState<string | null>(null);
- 
+
     // Função para buscar dados do usuário pelo id
     useEffect(() => {
-        SecureStore.getItemAsync('token').then((value) => { setTeste(value) });
 
         if (id) {
             fetchUsuario();
@@ -53,7 +49,6 @@ export default function Profile() {
     if (error) {
         return (
             <View style={styles.center}>
-                <Text>{teste}</Text>
                 <Text style={styles.error}>{error}</Text>
             </View>
         );

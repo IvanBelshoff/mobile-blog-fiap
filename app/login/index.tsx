@@ -5,7 +5,7 @@ import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
-    const { setToken, setUserId, setRegras, setPermissoes } = useAuth();
+    const { signIn } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
@@ -18,11 +18,12 @@ export default function Login() {
                 throw response;
             }
 
-            // Salvar informações no provider
-            setToken(response.accessToken);
-            setUserId(response.id.toString());
-            setRegras(response.regras.map((regra) => regra).join(", "));
-            setPermissoes(response.permissoes.map((permissao) => permissao).join(", "));
+            signIn({
+                token: response.accessToken,
+                userId: response.id.toString(),
+                regras: response.regras,
+                permissoes: response.permissoes
+            });
 
             // Navegar para a Home
             router.push("/");

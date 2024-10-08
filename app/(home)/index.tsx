@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, ActivityIndicator, VirtualizedList, FlatList } from 'react-native';
+import { Text, View, ActivityIndicator, VirtualizedList, FlatList, Platform } from 'react-native';
 import { AxiosError } from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 import { EXPO_LISTAGEM_VAZIA, EXPO_LISTAGEM_DE_POSTS } from '@env';
 import { IPosts, PostsService } from '@/services/Posts/postsService';
 import CardPost from '@/components/Cards/CardPost';
+import { ILoginProps } from '@/contexts/interfaces/interfaces';
+
 
 export default function Index() {
 
@@ -42,6 +44,15 @@ export default function Index() {
   };
 
   useEffect(() => {
+    if(Platform.OS === 'web') {
+      const teste = localStorage.getItem('session');
+      if (teste) {
+        const sessionProps = JSON.parse(teste) as ILoginProps;
+
+        console.log(sessionProps.token)
+      }
+
+    }
     fetchData();
   }, [params.filter, page]);
 
