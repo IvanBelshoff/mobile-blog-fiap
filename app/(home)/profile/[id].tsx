@@ -6,10 +6,12 @@ import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
 
 export default function Profile() {
+    
     const { id } = useLocalSearchParams();
     const [usuario, setUsuario] = useState<IUsuarioCompleto | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
     const fetchUsuario = async () => {
         try {
             const data = await UsuariosService.getById(Number(id)); // Chame o serviço com o ID do usuário
@@ -31,7 +33,6 @@ export default function Profile() {
 
     // Função para buscar dados do usuário pelo id
     useEffect(() => {
-
         if (id) {
             fetchUsuario();
         }
