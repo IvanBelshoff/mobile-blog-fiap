@@ -1,10 +1,13 @@
 import { IPosts } from '@/services/Posts/postsService';
+import { Link } from 'expo-router';
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-const CardPost = React.memo(({ post }: { post: IPosts }) => {
+const CardPost = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarEmPost: () => void }) => {
     return (
-        <View style={styles.card}>
+
+        <TouchableOpacity style={styles.card} onPress={aoClicarEmPost}>
+
             {/* Título centralizado */}
             <Text style={styles.title}>{post.titulo}</Text>
 
@@ -24,7 +27,9 @@ const CardPost = React.memo(({ post }: { post: IPosts }) => {
                     {new Date(post.data_criacao).toLocaleDateString()}
                 </Text>
             </View>
-        </View>
+
+        </TouchableOpacity >
+
     );
 });
 

@@ -57,6 +57,7 @@ export default function Profile() {
 
     return (
         <View style={styles.container}>
+            <Text>{id}</Text>
             {usuario && (
                 <>
                     {/* Exibindo a foto do usuário */}

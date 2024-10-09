@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Ícones do Expo
+import { Ionicons, } from '@expo/vector-icons'; // Ícones do Expo
 import { DrawerHeaderProps } from '@react-navigation/drawer';
 import { Link } from 'expo-router';
 import { EXPO_INPUT_DE_BUSCA } from '@env';
@@ -9,9 +9,17 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
   return (
     <View style={styles.headerContainer}>
-      <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
-        <Ionicons name="home-outline" size={25} color="black" />
-      </Link>
+
+      {props.route.name === 'post/[id]' ? (
+        <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
+          <Ionicons name="chevron-back-outline" size={25} color="black" />
+        </Link>
+      ) : (
+        <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
+          <Ionicons name="home-outline" size={25} color="black" />
+        </Link>
+      )}
+
       {props.route.name === 'index' && (
         <TextInput
           placeholder={EXPO_INPUT_DE_BUSCA}
@@ -20,6 +28,7 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
           onChangeText={onSearch} // Atualiza o estado da pesquisa a cada alteração de texto
         />
       )}
+
       <TouchableOpacity>
         <Ionicons onPress={() => props.navigation.toggleDrawer()} name="menu" size={25} color="black" />
       </TouchableOpacity>

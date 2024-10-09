@@ -106,7 +106,16 @@ export default function Index() {
         getItemLayout={(_, index) => (
           { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
         )}
-        renderItem={({ item }) => <CardPost post={item} />}
+        renderItem={({ item }) =>
+          <CardPost
+            post={item}
+            aoClicarEmPost={() => {
+              router.push({
+                pathname: '/post/[id]',
+                params: { id: item.id.toString() || 0 }
+              });
+            }} />
+        }
         keyExtractor={(item) => item.id.toString() + item.titulo}
         ListEmptyComponent={<Text>{EXPO_LISTAGEM_VAZIA}</Text>}
         onEndReached={(info: { distanceFromEnd: number }) => {

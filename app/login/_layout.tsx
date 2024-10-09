@@ -1,3 +1,4 @@
+import HeaderLogin from "@/components/Headers/HeaderLogin";
 import { Stack } from "expo-router";
 import { View } from "react-native";
 
@@ -9,7 +10,9 @@ export default function LoginLayout() {
             {/* Stack de navegação */}
             <Stack
                 screenOptions={{
-                    headerShown: false,
+                    header: () => (
+                        <HeaderLogin />
+                    )
                 }}
             />
         </View>

@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
-import Header from '@/components/Header';
+import Header from '@/components/Headers/Header';
 
 import { router } from "expo-router";
 import DrawerContent from '@/components/Drawer/DrawerContent';
@@ -13,7 +13,7 @@ export default function HomeLayout() {
 
     const handleSearchParams = useDebouncedCallback((filter: string) => {
         router.setParams({ filter: filter });
-      }, 300);
+    }, 300);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }} >
@@ -35,7 +35,6 @@ export default function HomeLayout() {
                                 params: { id: session?.userId || 0 }
                             });
                         }}
-
                         aoClicarEmSair={() => {
                             signOut();
                             router.push('/')
@@ -57,6 +56,18 @@ export default function HomeLayout() {
 
                 <Drawer.Screen
                     name="profile/[id]"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        )
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="post/[id]"
                     options={{
                         header: (props) => (
                             <Header
