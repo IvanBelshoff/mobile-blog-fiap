@@ -1,0 +1,31 @@
+{
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "NODE_ENV": "development",
+        "EXPO_BASE_URL": "http://10.86.177.3:5032/",
+        "EXPO_LISTAGEM_VAZIA": "Nenhum registro encontrado.",
+        "EXPO_LISTAGEM_DE_POSTS": "10",
+        "EXPO_LIMITE_DE_USUARIOS": "4",
+        "EXPO_INPUT_DE_BUSCA": "Pesquisar...",
+        "EXPO_TIME_DEBOUNCE": "300",
+        "EXPO_FILE_SIZE_LIMIT": "4"
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
+      "distribution": "internal"
+    },
+    "production": {}
+  }
+}

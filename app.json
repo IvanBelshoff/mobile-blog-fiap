@@ -19,7 +19,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ivanbelshoff.mobileblogfiap",
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +35,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5a32826e-0a81-49b3-91f8-da4d785738c1"
+      }
     }
   }
 }
