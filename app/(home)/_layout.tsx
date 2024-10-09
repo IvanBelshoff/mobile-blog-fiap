@@ -5,14 +5,15 @@ import Header from '@/components/Header';
 import { router } from "expo-router";
 import DrawerContent from '@/components/Drawer/DrawerContent';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDebouncedCallback } from 'use-debounce';
 
 export default function HomeLayout() {
 
     const { signOut, session } = useAuth();
 
-    const handleSearchParams = (filter: string) => {
+    const handleSearchParams = useDebouncedCallback((filter: string) => {
         router.setParams({ filter: filter });
-    }
+      }, 300);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }} >
