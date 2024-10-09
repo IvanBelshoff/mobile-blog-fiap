@@ -2,7 +2,7 @@ import { IPosts } from '@/services/Posts/postsService';
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
-export default function CardPost({ post }: { post: IPosts }) {
+const CardPost = React.memo(({ post }: { post: IPosts }) => {
     return (
         <View style={styles.card}>
             {/* Título centralizado */}
@@ -26,7 +26,7 @@ export default function CardPost({ post }: { post: IPosts }) {
             </View>
         </View>
     );
-}
+});
 
 const styles = StyleSheet.create({
     card: {
@@ -62,3 +62,5 @@ const styles = StyleSheet.create({
         color: '#555',
     },
 });
+
+export default CardPost;

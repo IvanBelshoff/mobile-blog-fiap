@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, View, ActivityIndicator, FlatList } from 'react-native';
 import { AxiosError } from 'axios';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { EXPO_LISTAGEM_VAZIA, EXPO_LISTAGEM_DE_POSTS } from '@env';
 import { IPosts, PostsService } from '@/services/Posts/postsService';
@@ -13,14 +13,16 @@ export default function Index() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1);
+  const ITEM_HEIGHT = 300; // Defina um valor que corresponda ao tamanho do CardPost
+  const flatListRef = useRef<FlatList>(null); // Criando a referência ao FlatList
 
-  const params = useLocalSearchParams<{ filter: string }>();
+  const params = useLocalSearchParams<{ filter: string, page: string }>();
 
-  const fetchData = async (): Promise<IPosts[] | AxiosError> => {
+  const fetchData = async (page: string, filter: string): Promise<IPosts[] | AxiosError> => {
 
     setLoading(true);
 
-    const result = await PostsService.getAll(page.toString(), params.filter, EXPO_LISTAGEM_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
+    const result = await PostsService.getAll(page, filter, EXPO_LISTAGEM_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
 
     if (result instanceof AxiosError) {
       setLoading(false);
@@ -35,12 +37,14 @@ export default function Index() {
 
   const loadMoreData = () => {
 
-    setPage((oldPage) => oldPage += 1);
-    fetchData().then((data) => {
+    fetchData(params.page || '1', params.filter).then((data) => {
+
       if (data instanceof AxiosError) {
+
         setError(data.message);
 
       } else {
+
         setPosts((oldPosts) => {
           if (oldPosts.length) {
             const novosPosts = data.filter((post) => !oldPosts.some((oldPost) => oldPost.id === post.id));
@@ -50,12 +54,31 @@ export default function Index() {
             return data;
           }
         });
+
       }
     });
   };
 
   useEffect(() => {
-    fetchData().then((data) => {
+
+    if (page !== parseInt(params.page || '1')) {
+
+      router.setParams({ page: page.toString() });
+
+    }
+
+  }, [page]);
+
+  useEffect(() => {
+
+    if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
+
+      setPage(parseInt(params.page));
+      flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+
+    }
+
+    fetchData(params.page || '1', params.filter).then((data) => {
       if (data instanceof AxiosError) {
         setError(data.message);
 
@@ -63,21 +86,37 @@ export default function Index() {
         setPosts(data);
       }
     });
-  }, [params.filter]);
+
+  }, [params.filter || params.page]);
 
   return (
     <View style={{ flex: 1 }}>
-
-      <Text>{page}</Text>
+      {error && (
+        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'red' }}>{error}</Text>
+        </View>
+      )}
 
       <FlatList
+        ref={flatListRef}
         data={posts}
         style={{ gap: 10, marginLeft: 10, marginRight: 10 }}
         initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        getItemLayout={(_, index) => (
+          { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
+        )}
         renderItem={({ item }) => <CardPost post={item} />}
         keyExtractor={(item) => item.id.toString() + item.titulo}
         ListEmptyComponent={<Text>{EXPO_LISTAGEM_VAZIA}</Text>}
-        onEndReached={loadMoreData}
+        onEndReached={(info: { distanceFromEnd: number }) => {
+
+          if (info.distanceFromEnd != 0) {
+            setPage(prev => prev + 1)
+            loadMoreData();
+          };
+
+        }}
         onEndReachedThreshold={0.5}
       />
       {loading && (

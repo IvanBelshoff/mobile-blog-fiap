@@ -2,14 +2,14 @@ import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Ícones do Expo
 import { DrawerHeaderProps } from '@react-navigation/drawer';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link } from 'expo-router';
 import { EXPO_INPUT_DE_BUSCA } from '@env';
 
 export default function Header({ props, onSearch }: { props: DrawerHeaderProps, onSearch: (query: string) => void }) {
 
   return (
     <View style={styles.headerContainer}>
-      <Link href={`/?filter=&page=`} style={{ cursor: 'pointer' }}>
+      <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
         <Ionicons name="home-outline" size={25} color="black" />
       </Link>
       {props.route.name === 'index' && (
