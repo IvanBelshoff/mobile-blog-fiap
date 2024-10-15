@@ -2,11 +2,12 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { ILoginProps } from '@/contexts/interfaces/interfaces';
+import { Environment } from '@/environment';
 
 export const Api = () => {
 
     const api = axios.create({
-        baseURL: process.env.EXPO_PUBLIC_BASE_URL,
+        baseURL: Environment.BASE_URL,
     });
 
     if (Platform.OS == 'web') {

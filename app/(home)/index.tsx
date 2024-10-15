@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { IPosts, PostsService } from '@/services/Posts/postsService';
 import CardPost from '@/components/Cards/CardPost';
+import { Environment } from '@/environment';
 
 export default function Index() {
 
@@ -21,7 +22,7 @@ export default function Index() {
 
     setLoading(true);
 
-    const result = await PostsService.getAll(page, filter, process.env.EXPO_PUBLIC_LISTAGEM_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
+    const result = await PostsService.getAll(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
 
     if (result instanceof AxiosError) {
       setLoading(false);
@@ -116,7 +117,7 @@ export default function Index() {
             }} />
         }
         keyExtractor={(item) => item.id.toString() + item.titulo}
-        ListEmptyComponent={<Text>{process.env.EXPO_PUBLIC_LISTAGEM_VAZIA}</Text>}
+        ListEmptyComponent={<Text>{Environment.LISTAGEM_VAZIA}</Text>}
         onEndReached={(info: { distanceFromEnd: number }) => {
 
           if (info.distanceFromEnd != 0) {

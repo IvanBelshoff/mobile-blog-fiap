@@ -2,7 +2,9 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons, MaterialIcons, SimpleLineIcons, Feather } from '@expo/vector-icons'; 
+import { Ionicons, MaterialIcons, SimpleLineIcons, Feather } from '@expo/vector-icons';
+import { Environment } from "@/environment";
+import { router } from "expo-router";
 
 export default function DrawerContent({ state, navigation, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair }: {
     state: DrawerContentComponentProps['state'],
@@ -23,13 +25,54 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             {/* Opção Home */}
             <TouchableOpacity
                 style={[styles.option, isActive('index') && styles.activeOption]}
-                onPress={() => navigation.navigate('index')}
+                onPress={() => router.push({ pathname: '/', params: { filter: '', page: '1' } })}
             >
                 <View style={styles.optionContent}>
                     <Ionicons name="home" size={24} color={isActive('index') ? '#000' : '#333'} />
                     <Text style={[styles.optionText, isActive('index') && styles.activeOptionText]}>
                         Iniciar
                     </Text>
+                </View>
+            </TouchableOpacity>
+
+            {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_PROFESSOR]) && (
+                <TouchableOpacity
+                    style={[styles.option, isActive('login') && styles.activeOption]}
+                    onPress={aoClicarEmAcessarConta}
+                >
+                    <View style={styles.optionContent}>
+                        <MaterialIcons name="post-add" size={28} color={isActive('login') ? '#000' : '#333'} />
+                        <Text style={[styles.optionText, isActive('login') && styles.activeOptionText]}>
+                            Gerenciar Posts
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_USUARIO]) && (
+                <TouchableOpacity
+                    style={[styles.option, isActive('login') && styles.activeOption]}
+                    onPress={aoClicarEmAcessarConta}
+                >
+                    <View style={styles.optionContent}>
+                        <MaterialIcons name="manage-accounts" size={28} color={isActive('login') ? '#000' : '#333'} />
+                        <Text style={[styles.optionText, isActive('login') && styles.activeOptionText]}>
+                            Gerenciar Usuários
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            {/* Espaço flexível para empurrar Configurações para o final */}
+            <View style={{ flex: 1 }} />
+
+            <View style={styles.divider} />
+
+            {/* Opção Configurações */}
+            <TouchableOpacity style={styles.option}>
+                <View style={styles.optionContent}>
+                    <Feather name="settings" size={24} color="#333" />
+                    <Text style={styles.optionText}>Configurações</Text>
                 </View>
             </TouchableOpacity>
 
@@ -59,16 +102,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                 </TouchableOpacity>
             )}
 
-            {/* Espaço flexível para empurrar Configurações para o final */}
-            <View style={{ flex: 1 }} />
 
-            {/* Opção Configurações */}
-            <TouchableOpacity style={styles.option}>
-                <View style={styles.optionContent}>
-                    <Feather name="settings" size={24} color="#333" />
-                    <Text style={styles.optionText}>Configurações</Text>
-                </View>
-            </TouchableOpacity>
 
             {/* Opção Sair (se houver token) */}
             {session?.token && (
@@ -92,7 +126,7 @@ const styles = StyleSheet.create({
     option: {
         paddingVertical: 16,
         borderRadius: 8, // Borda arredondada para as opções
-        marginBottom: 8, // Espaçamento entre as opções
+
     },
     optionContent: {
         flexDirection: 'row',
@@ -110,5 +144,11 @@ const styles = StyleSheet.create({
     },
     activeOptionText: {
         fontWeight: 'bold', // Texto em negrito para opção ativa
+    },
+    divider: {
+        borderBottomColor: '#ddd',
+        borderBottomWidth: 1,
+        marginTop: 8,
+        marginBottom: 8,
     },
 });
