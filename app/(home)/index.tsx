@@ -90,7 +90,7 @@ export default function Index() {
   }, [params.filter || params.page]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, }}>
       {error && (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ color: 'red' }}>{error}</Text>

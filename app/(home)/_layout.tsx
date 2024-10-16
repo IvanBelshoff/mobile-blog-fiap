@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import DrawerContent from '@/components/Drawer/DrawerContent';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebouncedCallback } from 'use-debounce';
+import { Environment } from '@/environment';
 
 export default function HomeLayout() {
 
@@ -13,7 +14,7 @@ export default function HomeLayout() {
 
     const handleSearchParams = useDebouncedCallback((filter: string) => {
         router.setParams({ filter: filter });
-    }, 300);
+    }, parseInt(Environment.TIME_DEBOUNCE));
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }} >
@@ -38,6 +39,9 @@ export default function HomeLayout() {
                         aoClicarEmSair={() => {
                             signOut();
                             router.push('/')
+                        }}
+                        aoClicarEmConfiguracoes={() => {
+                            router.push('/settings')
                         }}
                     />
                 )}
@@ -68,6 +72,18 @@ export default function HomeLayout() {
 
                 <Drawer.Screen
                     name="post/[id]"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        )
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="settings/index"
                     options={{
                         header: (props) => (
                             <Header

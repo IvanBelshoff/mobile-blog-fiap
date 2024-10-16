@@ -172,8 +172,7 @@ const getById = async (id: number): Promise<IPostCompleto | AxiosError> => {
 const deleteById = async (id: number): Promise<void | AxiosError> => {
     try {
         const data = await Api().delete(`/posts/${id}`);
-
-        console.log(data.status)
+        
         if (data.status == 204) {
             return;
         }

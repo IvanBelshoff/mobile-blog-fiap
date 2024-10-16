@@ -15,7 +15,6 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
     onSearch(''); // Atualiza o estado da pesquisa
   };
 
-  useEffect(() => { console.log(props.route.name) }, []);
   return (
     <View style={styles.headerContainer}>
       {props.route.name != 'index' ? (

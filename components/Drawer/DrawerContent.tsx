@@ -6,12 +6,13 @@ import { Ionicons, MaterialIcons, SimpleLineIcons, Feather } from '@expo/vector-
 import { Environment } from "@/environment";
 import { router } from "expo-router";
 
-export default function DrawerContent({ state, navigation, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair }: {
+export default function DrawerContent({ state, navigation, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair, aoClicarEmConfiguracoes }: {
     state: DrawerContentComponentProps['state'],
     navigation: DrawerContentComponentProps['navigation'],
     aoClicarEmAcessarConta: () => void,
     aoClicarEmMinhaConta: () => void,
-    aoClicarEmSair: () => void
+    aoClicarEmSair: () => void,
+    aoClicarEmConfiguracoes: () => void
 }) {
     const { session } = useAuth();
 
@@ -69,7 +70,9 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             <View style={styles.divider} />
 
             {/* Opção Configurações */}
-            <TouchableOpacity style={styles.option}>
+            <TouchableOpacity
+                style={[styles.option, isActive('settings/index') && styles.activeOption]}
+                onPress={aoClicarEmConfiguracoes}>
                 <View style={styles.optionContent}>
                     <Feather name="settings" size={24} color="#333" />
                     <Text style={styles.optionText}>Configurações</Text>
@@ -101,8 +104,6 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                     </View>
                 </TouchableOpacity>
             )}
-
-
 
             {/* Opção Sair (se houver token) */}
             {session?.token && (

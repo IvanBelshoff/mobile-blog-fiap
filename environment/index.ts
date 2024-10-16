@@ -49,7 +49,7 @@ export const Environment = {
 
     INPUT_DE_BUSCA: process.env.EXPO_PUBLIC_INPUT_DE_BUSCA,
 
-    TIME_DEBOUNCE: process.env.EXPO_PUBLIC_TIME_DEBOUNCE || 300,
+    TIME_DEBOUNCE: process.env.EXPO_PUBLIC_TIME_DEBOUNCE || '300',
 
     FILE_SIZE_LIMIT: process.env.EXPO_PUBLIC_FILE_SIZE_LIMIT || 4,
 
