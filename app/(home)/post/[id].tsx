@@ -3,6 +3,8 @@ import { View, Text, Image, ActivityIndicator, StyleSheet, ScrollView } from "re
 import { useLocalSearchParams } from 'expo-router';
 import { IPostCompleto, PostsService } from "@/services/Posts/postsService";
 import { AxiosError } from "axios";
+import { Theme } from "@react-navigation/native";
+import { useAppThemeContext } from "@/contexts/ThemeContext";
 
 export default function Post() {
 
@@ -10,6 +12,10 @@ export default function Post() {
     const [post, setPost] = useState<IPostCompleto | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
+    const { DefaultTheme } = useAppThemeContext();
+
+    const styles = stylesTeste(DefaultTheme);
 
     const fetchPost = async () => {
         try {
@@ -90,49 +96,52 @@ export default function Post() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    scrollViewContent: {
-        padding: 16,
-    },
-    center: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    image: {
-        width: '100%',
-        height: 250,
-        borderRadius: 16, // Cantos arredondados na imagem
-        marginBottom: 16,
-        marginTop: 16,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#333',
-        textAlign: 'center',
-        marginBottom: 20,
-        marginTop: 20,
-    },
-    content: {
-        fontSize: 18,
-        lineHeight: 26, // Altura da linha para facilitar a leitura
-        color: '#555',
-        textAlign: 'justify',
-        marginBottom: 16, // Este deve funcionar agora
-        marginTop: 16,
-    },
-    info: {
-        fontSize: 14,
-        color: '#888',
-        marginBottom: 8,
-    },
-    error: {
-        fontSize: 18,
-        color: 'red',
-    },
-});
+const stylesTeste = (theme: Theme) => {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: '#fff',
+        },
+        scrollViewContent: {
+            padding: 16,
+        },
+        center: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        image: {
+            width: '100%',
+            height: 250,
+            borderRadius: 16, // Cantos arredondados na imagem
+            marginBottom: 16,
+            marginTop: 16,
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: theme.colors.text,
+            textAlign: 'center',
+            marginBottom: 20,
+            marginTop: 20,
+        },
+        content: {
+            fontSize: 18,
+            lineHeight: 26, // Altura da linha para facilitar a leitura
+            color: theme.dark ? '#ECECEC': theme.colors.text,
+            textAlign: 'justify',
+            marginBottom: 16, // Este deve funcionar agora
+            marginTop: 16,
+        },
+        info: {
+            fontSize: 14,
+            color: theme.dark ? '#FFFFFFB3' : '#555',
+            marginBottom: 8,
+        },
+        error: {
+            fontSize: 18,
+            color: 'red',
+        },
+    });
+
+}

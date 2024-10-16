@@ -1,10 +1,12 @@
 import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
 import { Ionicons, MaterialIcons, SimpleLineIcons, Feather } from '@expo/vector-icons';
 import { Environment } from "@/environment";
 import { router } from "expo-router";
+import { Theme } from "@react-navigation/native";
+import { useAppThemeContext } from "@/contexts/ThemeContext";
 
 export default function DrawerContent({ state, navigation, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair, aoClicarEmConfiguracoes }: {
     state: DrawerContentComponentProps['state'],
@@ -15,11 +17,15 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
     aoClicarEmConfiguracoes: () => void
 }) {
     const { session } = useAuth();
-
+    const theme = useColorScheme();
     const isActive = (routeName: string) => {
         const focusedRoute = state.routes[state.index].name;
         return focusedRoute === routeName;
     };
+
+    const { DefaultTheme } = useAppThemeContext();
+
+    const styles = stylesTeste(DefaultTheme);
 
     return (
         <View style={styles.container}>
@@ -29,9 +35,13 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                 onPress={() => router.push({ pathname: '/', params: { filter: '', page: '1' } })}
             >
                 <View style={styles.optionContent}>
-                    <Ionicons name="home" size={24} color={isActive('index') ? '#000' : '#333'} />
-                    <Text style={[styles.optionText, isActive('index') && styles.activeOptionText]}>
-                        Iniciar
+                    <MaterialIcons
+                        name="home"
+                        size={28}
+                        color={(theme === 'light' && isActive('index')) ? '#FFF' : (theme === 'dark' && isActive('index')) ? '#FFF' : (theme === 'light' && !isActive('index')) ? '#000' : '#FFF'}
+                    />
+                    <Text style={[(theme === 'light' && isActive('index')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('index')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('index')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                        Blog
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -42,8 +52,9 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="post-add" size={28} color={isActive('login') ? '#000' : '#333'} />
-                        <Text style={[styles.optionText, isActive('login') && styles.activeOptionText]}>
+                        <MaterialIcons name="post-add" size={28}
+                            color={(theme === 'light' && isActive('login')) ? '#FFF' : (theme === 'dark' && isActive('login')) ? '#FFF' : (theme === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
+                        <Text style={[(theme === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
                             Gerenciar Posts
                         </Text>
                     </View>
@@ -56,8 +67,9 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="manage-accounts" size={28} color={isActive('login') ? '#000' : '#333'} />
-                        <Text style={[styles.optionText, isActive('login') && styles.activeOptionText]}>
+                        <MaterialIcons name="manage-accounts" size={28}
+                            color={(theme === 'light' && isActive('login')) ? '#FFF' : (theme === 'dark' && isActive('login')) ? '#FFF' : (theme === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
+                        <Text style={[(theme === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
                             Gerenciar Usuários
                         </Text>
                     </View>
@@ -74,8 +86,10 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                 style={[styles.option, isActive('settings/index') && styles.activeOption]}
                 onPress={aoClicarEmConfiguracoes}>
                 <View style={styles.optionContent}>
-                    <Feather name="settings" size={24} color="#333" />
-                    <Text style={styles.optionText}>Configurações</Text>
+                    <MaterialIcons name="settings" size={28}
+                        color={(theme === 'light' && isActive('settings/index')) ? '#FFF' : (theme === 'dark' && isActive('settings/index')) ? '#FFF' : (theme === 'light' && !isActive('settings/index')) ? '#000' : '#FFF'} />
+                    <Text style={[(theme === 'light' && isActive('settings/index')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('settings/index')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('settings/index')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                        Configurações</Text>
                 </View>
             </TouchableOpacity>
 
@@ -85,8 +99,9 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                     onPress={aoClicarEmMinhaConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="account-circle" size={24} color={isActive('profile/[id]') ? '#000' : '#333'} />
-                        <Text style={[styles.optionText, isActive('profile/[id]') && styles.activeOptionText]}>
+                        <MaterialIcons name="account-circle" size={24}
+                            color={(theme === 'light' && isActive('profile/[id]')) ? '#FFF' : (theme === 'dark' && isActive('profile/[id]')) ? '#FFF' : (theme === 'light' && !isActive('profile/[id]')) ? '#000' : '#FFF'} />
+                        <Text style={[(theme === 'light' && isActive('profile/[id]')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('profile/[id]')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('profile/[id]')) ? styles.optionTextDark : styles.optionTextWhite]}>
                             Minha Conta
                         </Text>
                     </View>
@@ -97,8 +112,9 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
-                        <SimpleLineIcons name="login" size={24} color={isActive('login') ? '#000' : '#333'} />
-                        <Text style={[styles.optionText, isActive('login') && styles.activeOptionText]}>
+                        <SimpleLineIcons name="login" size={24}
+                            color={(theme === 'light' && isActive('login')) ? '#FFF' : (theme === 'dark' && isActive('login')) ? '#FFF' : (theme === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
+                        <Text style={[(theme === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (theme === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
                             Acessar Conta
                         </Text>
                     </View>
@@ -109,47 +125,68 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             {session?.token && (
                 <TouchableOpacity style={styles.option} onPress={aoClicarEmSair}>
                     <View style={styles.optionContent}>
-                        <SimpleLineIcons name="logout" size={24} color="#333" />
-                        <Text style={styles.optionText}>Sair</Text>
+                        <MaterialIcons
+                            name="logout"
+                            size={28}
+                            color={theme === 'light' ? '#000' : '#FFF'} // Alterei para garantir contraste
+                        />
+                        <Text style={[theme === 'light' ? styles.optionTextDark : styles.optionTextWhite]}>
+                            Sair
+                        </Text>
                     </View>
                 </TouchableOpacity>
             )}
+
         </View>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        padding: 16,
-    },
-    option: {
-        paddingVertical: 16,
-        borderRadius: 8, // Borda arredondada para as opções
+const stylesTeste = (theme: Theme) => {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.colors.background,
+            padding: 16,
+        },
+        option: {
+            paddingVertical: 16,
+            borderRadius: 8, // Borda arredondada para as opções
+        },
+        activeOption: {
+            backgroundColor: theme.colors.primary,
+            paddingVertical: 16, // Cor de fundo para opção ativa
+            borderRadius: 8, // Bordas arredondadas
+        },
+        optionContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginLeft: 10, // Espaço entre a borda e o ícone
+        },
+        optionActiveTextWhite: {
+            fontSize: 16,
+            color: '#FFF',
+            marginLeft: 10,
+            fontWeight: 'bold'
+        },
+        optionTextWhite: {
+            fontSize: 16,
+            color: '#FFF',
+            marginLeft: 10
+        },
+        optionTextDark: {
+            fontSize: 16,
+            color: '#000',
+            marginLeft: 10
+        },
+        activeOptionText: {
+            fontWeight: 'bold', // Texto em negrito para opção ativa
+        },
+        divider: {
+            borderBottomColor: '#ddd',
+            borderBottomWidth: 1,
+            marginTop: 8,
+            marginBottom: 8,
+        },
+    });
+}
 
-    },
-    optionContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginLeft: 10, // Espaço entre a borda e o ícone
-    },
-    optionText: {
-        fontSize: 16,
-        color: '#333',
-        marginLeft: 10, // Espaço entre o ícone e o texto
-    },
-    activeOption: {
-        backgroundColor: '#e0e0e0', // Cor de fundo para opção ativa
-        borderRadius: 8, // Bordas arredondadas
-    },
-    activeOptionText: {
-        fontWeight: 'bold', // Texto em negrito para opção ativa
-    },
-    divider: {
-        borderBottomColor: '#ddd',
-        borderBottomWidth: 1,
-        marginTop: 8,
-        marginBottom: 8,
-    },
-});

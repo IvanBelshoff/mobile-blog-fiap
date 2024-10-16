@@ -6,13 +6,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { IPosts, PostsService } from '@/services/Posts/postsService';
 import CardPost from '@/components/Cards/CardPost';
 import { Environment } from '@/environment';
+import { useAppThemeContext } from '@/contexts/ThemeContext';
 
 export default function Index() {
 
   const [posts, setPosts] = useState<IPosts[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { DefaultTheme } = useAppThemeContext()
   const ITEM_HEIGHT = 300; // Defina um valor que corresponda ao tamanho do CardPost
   const flatListRef = useRef<FlatList>(null); // Criando a referência ao FlatList
 
@@ -117,7 +118,11 @@ export default function Index() {
             }} />
         }
         keyExtractor={(item) => item.id.toString() + item.titulo}
-        ListEmptyComponent={<Text>{Environment.LISTAGEM_VAZIA}</Text>}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 30 }}>
+            <Text style={{ color: DefaultTheme.colors.text }}>{Environment.LISTAGEM_VAZIA}</Text>
+          </View>
+        }
         onEndReached={(info: { distanceFromEnd: number }) => {
 
           if (info.distanceFromEnd != 0) {
@@ -130,7 +135,7 @@ export default function Index() {
       />
       {loading && (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
         </View>
       )}
 

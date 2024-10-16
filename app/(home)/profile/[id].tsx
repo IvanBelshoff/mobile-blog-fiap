@@ -8,6 +8,8 @@ import * as ImagePicker from 'expo-image-picker'; // Importar ImagePicker
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import * as FileSystem from 'expo-file-system'; // Importar FileSystem
 import { useAuth } from "@/contexts/AuthContext";
+import { Theme } from "@react-navigation/native";
+import { useAppThemeContext } from "@/contexts/ThemeContext";
 
 interface IActionDetalhesDeUsuarios {
     response?: {
@@ -47,6 +49,7 @@ export default function Profile() {
     const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined); // Estado para imagem selecionada
     const [fodace, setFodace] = useState<string>(""); // Estado para imagem selecionada
     const { signOut } = useAuth();
+    const { DefaultTheme } = useAppThemeContext();
 
     const fetchUsuario = async () => {
         try {
@@ -143,7 +146,7 @@ export default function Profile() {
         }
     };
 
-
+    const styles = stylesTeste(DefaultTheme);
 
     // Função para buscar dados do usuário pelo id
     useEffect(() => {
@@ -198,8 +201,6 @@ export default function Profile() {
                     <View style={{ flex: 1 }}>
                         {/* Imagem de perfil centralizada */}
                         <View style={styles.imageContainer}>
-
-                            <Text style={styles.titleAccount}>Minha Conta</Text>
 
                             <Image
                                 source={{ uri: selectedImage || usuario.foto.url }} // Mostra a imagem selecionada ou a atual
@@ -265,111 +266,118 @@ export default function Profile() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-    },
-    center: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageContainer: {
-        alignItems: 'center',
-        gap: 10,
-        marginBottom: 16,
-        marginTop: 10,
-    },
-    profileImage: {
-        width: 200,
-        height: 200,
-        borderRadius: 100, // Redonda
-        marginBottom: 16,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    userContainer: {
-        flexDirection: 'column',
-        gap: 10,
-    },
-    buttonDelete: {
-        flex: 1,
-        backgroundColor: '#FF0000',
-        padding: 10,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginHorizontal: 5,
-    },
-    buttonAlter: {
-        flex: 1,
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginHorizontal: 5,
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    divider: {
-        borderBottomColor: '#ddd',
-        borderBottomWidth: 1,
-        marginVertical: 16,
-    },
-    name: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 8,
-    },
-    email: {
-        fontSize: 18,
-        color: '#555',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-    passwordContainer: {
-        marginTop: 10,
-        marginBottom: 16,
-        gap: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    passwordInput: {
-        width: '100%',
-        padding: 10,
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 8,
-        marginBottom: 16,
-    },
-    titleAccount: {
-        fontSize: 25,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    error: {
-        fontSize: 18,
-        color: 'red',
-    },
-    confirmButton: {
-        backgroundColor: '#28a745',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 8,
-    },
-    confirmButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-});
+const stylesTeste = (theme: Theme) => {
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            padding: 16,
+            backgroundColor: theme.colors.background,
+        },
+        center: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        imageContainer: {
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 16,
+            marginTop: 10,
+        },
+        profileImage: {
+            width: 200,
+            height: 200,
+            borderRadius: 100, // Redonda
+            marginBottom: 16,
+        },
+        buttonContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+        },
+        userContainer: {
+            flexDirection: 'column',
+            gap: 10,
+        },
+        buttonDelete: {
+            flex: 1,
+            backgroundColor: '#FF0000',
+            padding: 10,
+            borderRadius: 8,
+            alignItems: 'center',
+            marginHorizontal: 5,
+        },
+        buttonAlter: {
+            flex: 1,
+            backgroundColor: '#007bff',
+            padding: 10,
+            borderRadius: 8,
+            alignItems: 'center',
+            marginHorizontal: 5,
+        },
+        buttonText: {
+            color: theme.colors.text,
+            fontWeight: 'bold',
+        },
+        divider: {
+            borderBottomColor: theme.colors.border,
+            borderBottomWidth: 1,
+            marginVertical: 16,
+        },
+        name: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginBottom: 8,
+            color: theme.colors.text,
+        },
+        email: {
+            fontSize: 18,
+            color: theme.colors.text,
+            textAlign: 'center',
+            marginBottom: 16,
+        },
+        passwordContainer: {
+            marginTop: 10,
+            marginBottom: 16,
+            gap: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        passwordInput: {
+            width: '100%',
+            padding: 10,
+            borderColor: theme.colors.border,
+            borderWidth: 1,
+            borderRadius: 8,
+            marginBottom: 16,
+        },
+        titleAccount: {
+            fontSize: 25,
+            fontWeight: 'bold',
+            marginBottom: 8,
+        },
+        sectionTitle: {
+            fontSize: 20,
+            fontWeight: 'bold',
+            marginBottom: 8,
+            color: theme.colors.text,
+        },
+        error: {
+            fontSize: 18,
+            color: 'red',
+        },
+        confirmButton: {
+            backgroundColor: '#28a745',
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 8,
+        },
+        confirmButtonText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+    });
+}
+
+

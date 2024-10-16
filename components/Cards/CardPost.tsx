@@ -1,9 +1,16 @@
+import { useAppThemeContext } from '@/contexts/ThemeContext';
 import { IPosts } from '@/services/Posts/postsService';
+import { Theme } from '@react-navigation/native';
 import { Link } from 'expo-router';
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const CardPost = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarEmPost: () => void }) => {
+
+    const { DefaultTheme } = useAppThemeContext();
+
+    const styles = stylesTeste(DefaultTheme);
+
     return (
 
         <TouchableOpacity style={styles.card} onPress={aoClicarEmPost}>
@@ -33,39 +40,42 @@ const CardPost = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarE
     );
 });
 
-const styles = StyleSheet.create({
-    card: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 16,
-        marginVertical: 8,
-        backgroundColor: '#fff',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 12,
-    },
-    image: {
-        width: '100%',
-        height: 200,
-        borderRadius: 8,
-        marginBottom: 12,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    author: {
-        fontSize: 14,
-        color: '#555',
-    },
-    date: {
-        fontSize: 14,
-        color: '#555',
-    },
-});
+const stylesTeste = (theme: Theme) => {
+    return StyleSheet.create({
+        card: {
+            borderWidth: 1,
+            borderColor: theme.dark ? '#9CA3AF' : theme.colors.border,
+            borderRadius: 8,
+            padding: 16,
+            marginVertical: 8,
+            backgroundColor: theme.colors.card,
+        },
+        title: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: theme.colors.text,
+            marginBottom: 12,
+        },
+        image: {
+            width: '100%',
+            height: 200,
+            borderRadius: 8,
+            marginBottom: 12,
+        },
+        footer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        author: {
+            fontSize: 14,
+            color: theme.dark ? '#FFFFFFB3' : '#555',
+        },
+        date: {
+            fontSize: 14,
+            color: theme.dark ? '#FFFFFFB3' : '#555',
+        },
+    });
+}
 
 export default CardPost;
