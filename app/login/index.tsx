@@ -126,12 +126,12 @@ export default function Login() {
             <View style={styles.sectionSubmit}>
                 {login ? (
                     <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                        <MaterialIcons name="meeting-room" size={24} color="#ED145B" style={styles.icon} />
+                        <MaterialIcons name="meeting-room" size={24} color={DefaultTheme.colors.primary} style={styles.icon} />
                         <Text style={styles.buttonText}>Entrar</Text>
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-                        <MaterialIcons name="send" size={24} color="#ED145B" style={styles.icon} />
+                        <MaterialIcons name="send" size={24} color={DefaultTheme.colors.primary} style={styles.icon} />
                         <Text style={styles.buttonText}>Enviar</Text>
                     </TouchableOpacity>
                 )}
