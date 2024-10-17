@@ -51,7 +51,7 @@ export default function SettingsScreen() {
                         color: DefaultTheme.colors.text
                     }}
                     title="Contato"
-                    description="grupo913@gmail.com"
+                    description="fiapgrupo913@gmail.com"
                     left={() => <MaterialIcons name="mail-outline" color={DefaultTheme.colors.primary} size={24} />}
                 />
                 <List.Item

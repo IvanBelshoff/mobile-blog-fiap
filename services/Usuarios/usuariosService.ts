@@ -97,8 +97,33 @@ export const updatePasswordById = async (
     }
 };
 
+
+const recoverPassword = async (emailRecuperacao: string): Promise<void | AxiosError> => {
+    try {
+        const data = await Api().post('/recuperar', { emailRecuperacao });
+
+        if (data.status == 200) {
+            return data.data;
+        }
+
+        return new AxiosError('Erro ao consultar o registros.', undefined, data.config);
+    } catch (error) {
+
+        const errors = (error as IResponseErrosGeneric).response;
+
+        if (isAxiosError(error)) {
+            return error;
+        }
+
+        return new AxiosError(
+            errors?.data?.errors?.default || 'Erro ao consultar o registros.',
+            errors?.status || '500');
+    }
+};
+
 export const UsuariosService = {
     login,
     getById,
-    updatePasswordById
+    updatePasswordById,
+    recoverPassword
 };
