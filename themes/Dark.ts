@@ -1,6 +1,6 @@
-import { Theme } from "@react-navigation/native";
+import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 
-export const DarkTheme: Theme = {
+export const DarkTheme: IThemeMaximized = {
     dark: true,
     colors: {
         primary: '#ED145B', // Cor principal do aplicativo
@@ -10,4 +10,10 @@ export const DarkTheme: Theme = {
         border: '#FFFFFF', // Cor das bordas
         notification: '#FF453A', // Cor das notificações
     },
+    actions: {
+        error: "#FF453A",
+        success: "#34C759",
+        warning: "#FFD60A",
+        info: "#007AFF"
+    }
 };

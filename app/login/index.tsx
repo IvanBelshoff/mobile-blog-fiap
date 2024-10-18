@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, } from "expo-router";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { useAuth } from "@/contexts/AuthContext";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -248,7 +248,7 @@ const stylesTeste = (theme: Theme) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "#FFF",
-            borderRadius: 24,  // Cantos arredondados
+            borderRadius: 8,  // Cantos arredondados
             paddingVertical: 12,
             paddingHorizontal: 32,
             // Adicionando sombra

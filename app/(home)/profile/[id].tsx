@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
-import * as ImagePicker from 'expo-image-picker'; // Importar ImagePicker
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import * as FileSystem from 'expo-file-system'; // Importar FileSystem
-import { useAuth } from "@/contexts/AuthContext";
 import { Theme } from "@react-navigation/native";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import ContentCopy from "@/components/CopyContent";
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
+import { Environment } from "@/environment";
+import { IThemeMaximized } from "@/globalInterfaces/interfaces";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface IActionDetalhesDeUsuarios {
     response?: {
@@ -45,13 +46,74 @@ interface IDetalhesDeUsuarioAction {
 export default function Profile() {
 
     const { id } = useLocalSearchParams();
+
+    const { signOut } = useAuth();
+
     const [usuario, setUsuario] = useState<IUsuarioCompleto | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<IDetalhesDeUsuarioAction | undefined>(undefined);
-    const [senha, setSenha] = useState<string>(""); // Estado para senha
-    const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined); // Estado para imagem selecionada
-    const { signOut } = useAuth();
+    const [showPassword, setShowPassword] = useState(false);
+    const [password, setPassword] = useState<string>('');
+    const [statePhoto, setStatePhoto] = useState<'original' | 'preview'>('original');
+    const [selectedImage, setSelectedImage] = useState<{ uri: string; name: string; type: string } | null>(null);
+    const [limitedFileSize, setLimitedFileSize] = useState<boolean>(true);
+
     const { DefaultTheme } = useAppThemeContext();
+
+    const styles = stylesTeste(DefaultTheme);
+
+    const checkFileSizeBoolean = (fileSizeInBytes: number, maxSizeInMB: number): boolean => {
+        // Convertendo o limite de MB para bytes
+        const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+
+        // Verifica se o arquivo ultrapassa o tamanho máximo
+        if (fileSizeInBytes > maxSizeInBytes) {
+            return true;
+        }
+
+        // Retorna null se o arquivo estiver dentro do limite
+        return false;
+    };
+
+    // Função para escolher a foto
+    const pickImageAsync = async () => {
+        // Pedir permissão para acessar a galeria
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (!permissionResult.granted) {
+            Alert.alert("Permissão necessária", "Você precisa conceder permissão para acessar a galeria.");
+            return;
+        }
+
+        // Abrir a galeria
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, // Somente imagens
+            allowsEditing: true, // Permitir edição da imagem
+            quality: 0.1, // Qualidade da imagem
+        });
+
+        if (!result.canceled && result.assets[0].fileSize) {
+
+            console.log('Resultado' + result.assets[0].fileSize);
+            const fileSize = checkFileSizeBoolean(result.assets[0].fileSize, Environment.FILE_SIZE_LIMIT); // Verifica o tamanho do arquivo
+
+            if (fileSize) {
+                setLimitedFileSize(false);
+            }
+
+            // Estrutura da imagem conforme o solicitado
+            const image = {
+                uri: result.assets[0].uri, // Caminho da imagem
+                name: result.assets[0].uri.split('/').pop() || `image-${Date.now()}.jpg`, // Nome da imagem
+                type: 'image/jpeg' // Tipo de arquivo, pode ser alterado dependendo do tipo real da imagem
+            };
+
+            console.log('Imagem' + image.uri);
+            // Armazenar a imagem no estado
+            setSelectedImage(image);
+            setStatePhoto('preview');
+        }
+    };
 
     const fetchUsuario = async () => {
         try {
@@ -68,6 +130,7 @@ export default function Profile() {
                 setLoading(false);
                 return;
             } else {
+                console.log('Data:' + data.foto.url);
                 setUsuario(data);
             }
 
@@ -82,80 +145,131 @@ export default function Profile() {
         }
     };
 
-    const handleSubmit = async (id: number, senha?: string, selectedImage?: string) => {
-        try {
-            let file: { uri: string; name: string; type: string } | undefined;
+    const handleSubmitPhoto = async () => {
 
-            // Verificar se uma imagem foi selecionada
-            if (selectedImage) {
-                const info = await FileSystem.getInfoAsync(selectedImage);
-                if (info.exists) {
-                    // Montar o objeto do arquivo
-                    file = {
-                        uri: info.uri,
-                        name: info.uri.split('/').pop() || 'image.jpg',
-                        type: 'image/jpeg', // ou o tipo correto
-                    };
-                }
+        if (!selectedImage) {
+            Alert.alert("Erro", "Nenhuma imagem selecionada.");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await UsuariosService.updatePasswordById(Number(id), undefined, selectedImage);
+
+            if (response instanceof AxiosError) {
+                const errors = (response as IActionDetalhesDeUsuarios).response?.data.errors;
+
+                console.log('Erros' + errors);
+                setError({
+                    errors: {
+                        default: errors?.default,
+                    }
+                });
+
+                setSelectedImage(null);
+                setStatePhoto('original');
+                setLoading(false);
+                return;
+            } else {
+
+                Alert.alert("Sucesso", "Foto enviada com sucesso!");
+
+                await fetchUsuario().then(() => {
+                    setSelectedImage(null);
+                    setStatePhoto('original');
+                }).finally(() => {
+                    setLoading(false)
+                });
+
             }
 
-            // Agora file estará definido ou undefined, assim a chamada ao serviço pode ser feita
-            const usuario = await UsuariosService.updatePasswordById(
-                id,
-                senha || undefined,
-                file // Passa o file diretamente, pode ser undefined
-            );
+        } catch (error) {
+            Alert.alert("Erro", "Falha ao enviar a foto.");
+            console.error(error);
+        }
+    };
 
-            if (usuario instanceof Error) {
-                // Limpar estados em caso de erro
-                setSenha(""); // Limpa a senha
-                setSelectedImage(undefined); // Limpa a imagem
-                file = undefined; // Limpa o arquivo
+    const handleResetPassword = async () => {
+        try {
 
-                const errors = (usuario as IActionDetalhesDeUsuarios).response?.data.errors;
+            const response = await UsuariosService.updatePasswordById(Number(id), password);
+
+            if (response instanceof AxiosError) {
+                const errors = (response as IActionDetalhesDeUsuarios).response?.data.errors;
 
                 setError({
                     errors: {
                         default: errors?.default,
                         body: {
-                            senha: errors?.body?.senha || "Erro desconhecido",
+                            senha: errors?.body?.senha || 'Erro Desconhecido'
                         }
                     }
                 });
-            } else {
-                // Limpar estados em caso de sucesso
-                setSenha(""); // Limpa a senha
-                setSelectedImage(undefined); // Limpa a imagem
-                file = undefined; // Limpa o arquivo
-                setError(undefined);
 
-                if (senha) {
-                    // Navegar para a Home
-                    Alert.alert("Sucesso", "Senha atualizada com sucesso.");
-                    signOut();
-                    router.push("/");
-                } else {
-                    fetchUsuario();
-                    Alert.alert("Sucesso", "Foto atualizada com sucesso.");
-                }
+                setLoading(false);
+                return;
+            } else {
+
+                Alert.alert("Sucesso", "Senha alterada com sucesso!");
+
+                signOut();
+
             }
 
         } catch (error) {
-            Alert.alert("Erro", "Ocorreu um erro ao atualizar as informações.");
+            Alert.alert("Erro", "Falha ao alterar a senha.");
+
         }
-    };
+    }
 
-    const styles = stylesTeste(DefaultTheme);
+    const handleChangePassword = async (text: string) => {
+        setPassword(text);
+    }
 
+    const handleDeletePhoto = async () => {
+        try {
+            setLoading(true);
 
-    const [showPassword, setShowPassword] = useState(false);
+            const response = await UsuariosService.deleteFotoById(Number(id));
+
+            if (response instanceof AxiosError) {
+                const errors = (response as IActionDetalhesDeUsuarios).response?.data.errors;
+
+                setError({
+                    errors: {
+                        default: errors?.default,
+                    }
+                });
+
+                setLoading(false);
+                return;
+            } else {
+
+                Alert.alert("Sucesso", "Foto excluída com sucesso!");
+
+                await fetchUsuario().finally(() => setLoading(false));
+
+            }
+
+        } catch (error) {
+            Alert.alert("Erro", "Falha ao excluir a foto.");
+            console.error(error);
+        }
+    }
+
+    const handleCancelSubmit = () => {
+        console.log('Cancelar');
+        setSelectedImage(null);
+        setStatePhoto('original');
+        setLimitedFileSize(true);
+    }
 
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
     };
 
     const handleCopy = (value: string) => {
-        console.log(value);
 
         if (Platform.OS === 'web') {
             // Utiliza a API nativa do navegador para copiar o texto
@@ -179,24 +293,11 @@ export default function Profile() {
     };
     // Função para buscar dados do usuário pelo id
     useEffect(() => {
-        if (id) {
-            fetchUsuario();
-        }
+
+        fetchUsuario();
+
     }, [id]);
 
-    // Função para escolher a foto
-    const pickImageAsync = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setSelectedImage(result.assets[0].uri); // Armazena a URI da imagem
-        } else {
-            alert('Você não selecionou nenhuma imagem.');
-        }
-    };
 
     if (loading) {
         return (
@@ -231,22 +332,48 @@ export default function Profile() {
                         {/* Imagem de perfil centralizada */}
                         <View style={styles.imageContainer}>
 
-                            <Image
-                                source={{ uri: selectedImage || usuario.foto.url }} // Mostra a imagem selecionada ou a atual
-                                style={styles.profileImage}
-                            />
+                            {statePhoto === 'original' ? (
+                                <Image
+                                    source={{ uri: usuario.foto.url }} // Mostra a imagem selecionada ou a atual
+                                    style={styles.profileImage}
+                                />
+                            ) : (
+                                <Image
+                                    source={{ uri: selectedImage?.uri }} // Mostra a imagem selecionada ou a atual
+                                    style={styles.profileImage}
+                                />
+                            )}
 
-                            {/* Botões para alterar e excluir foto */}
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
-                                    <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
-                                    <Text style={styles.buttonTextUpload}>Carregar Foto</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.buttonDelete}>
-                                    <MaterialIcons name="delete" size={22} color="#ED145B" style={styles.iconButton} />
-                                    <Text style={styles.buttonTextDelete}>Excluir Foto</Text>
-                                </TouchableOpacity>
-                            </View>
+                            {!limitedFileSize && (
+                                <View style={styles.ErrorContainer}>
+                                    <Text style={styles.error}>A imagem ultrapassa o limite de tamanho permitido.</Text>
+                                </View>
+                            )}
+
+                            {selectedImage ? (
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity style={[!limitedFileSize ? styles.buttonUploadDisable : styles.buttonUpload]} onPress={handleSubmitPhoto} disabled={!limitedFileSize}>
+                                        <MaterialIcons name="image" size={22} color="#FFF" style={styles.iconButton} />
+                                        <Text style={styles.buttonTextUpload}>Salvar Foto</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.buttonDelete} onPress={handleCancelSubmit}>
+                                        <MaterialIcons name="cancel" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
+                                        <Text style={styles.buttonTextDelete}>Cancelar Alteração</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
+                                        <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
+                                        <Text style={styles.buttonTextUpload}>Carregar Foto</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.buttonDelete} onPress={handleDeletePhoto}>
+                                        <MaterialIcons name="delete" size={22} color="#ED145B" style={styles.iconButton} />
+                                        <Text style={styles.buttonTextDelete}>Excluir Foto</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
                         </View>
 
                         <View style={styles.sectionTitleUser}>
@@ -307,8 +434,8 @@ export default function Profile() {
                                 <View style={styles.containerInputPassword}>
                                     <TextInput
                                         secureTextEntry={!showPassword}
-                                        value={senha}
-                                        onChangeText={setSenha}
+                                        value={password}
+                                        onChangeText={handleChangePassword}
                                         style={styles.inputPassword}
                                         placeholder="Senha"
                                         placeholderTextColor="#aaa"
@@ -322,12 +449,18 @@ export default function Profile() {
                                     />
                                 </View>
 
-                                {senha && (
-                                    <TouchableOpacity style={styles.confirmButton} onPress={() => handleSubmit(usuario.id, senha)}>
-                                            <MaterialIcons name="password" size={24} color={'#FFF'} style={styles.iconButton} />
+                                {error?.errors?.body?.senha && (
+                                    <View style={styles.ErrorContainer}>
+                                        <Text style={styles.error}>{error?.errors?.body?.senha}</Text>
+                                    </View>
+                                )}
+                                {password && (
+                                    <TouchableOpacity style={styles.confirmButton} onPress={handleResetPassword}>
+                                        <MaterialIcons name="password" size={24} color={'#FFF'} style={styles.iconButton} />
                                         <Text style={styles.confirmButtonText}>Atualizar Senha</Text>
                                     </TouchableOpacity>
                                 )}
+
                             </View>
 
                         </View>
@@ -337,11 +470,11 @@ export default function Profile() {
                 )}
 
             </KeyboardAwareScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView >
     );
 }
 
-const stylesTeste = (theme: Theme) => {
+const stylesTeste = (theme: IThemeMaximized) => {
 
     return StyleSheet.create({
         container: {
@@ -372,6 +505,21 @@ const stylesTeste = (theme: Theme) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: theme.colors.primary,
+            borderRadius: 8,  // Cantos arredondados
+            paddingVertical: 12,
+            paddingHorizontal: 12,
+            // Adicionando sombra
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            elevation: 5, // Para Android
+        },
+        buttonUploadDisable: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: '#ccc',
             borderRadius: 8,  // Cantos arredondados
             paddingVertical: 12,
             paddingHorizontal: 12,
@@ -516,8 +664,13 @@ const stylesTeste = (theme: Theme) => {
         },
         error: {
             fontSize: 18,
-            color: 'red',
-        }
+            color: theme.actions.error,
+        },
+        ErrorContainer: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 15,
+        },
     });
 }
 

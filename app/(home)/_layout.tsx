@@ -19,6 +19,9 @@ export default function HomeLayout() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }} >
             <Drawer
+                initialRouteName='/'
+                backBehavior='initialRoute'
+                
                 screenOptions={{
                     drawerPosition: 'right',
                     drawerType: 'front',

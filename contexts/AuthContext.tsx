@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { useStorageState } from "./useStorageState";
 import { ILoginProps } from "./interfaces/interfaces";
+import { router } from "expo-router";
 
 const AuthContext = createContext<{
     signIn: (loginData: ILoginProps) => void;
@@ -37,6 +38,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
                 },
                 signOut: () => {
                     setSession(null); // Remover sessão
+                    router.push("/(home)");
                 },
                 session,
                 isLoading,

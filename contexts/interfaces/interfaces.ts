@@ -1,4 +1,4 @@
-import { Theme } from "@react-navigation/native";
+import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 
 //AuthContext
 export interface ILoginProps {
@@ -11,5 +11,5 @@ export interface ILoginProps {
 export interface IThemeContex {
     theme: "light" | "dark" | "automatic";
     toggleTheme: (selectedTheme: "light" | "dark" | "automatic") => void
-    DefaultTheme: Theme;
+    DefaultTheme: IThemeMaximized;
 }

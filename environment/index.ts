@@ -51,7 +51,7 @@ export const Environment = {
 
     TIME_DEBOUNCE: process.env.EXPO_PUBLIC_TIME_DEBOUNCE || '300',
 
-    FILE_SIZE_LIMIT: process.env.EXPO_PUBLIC_FILE_SIZE_LIMIT || 4,
+    FILE_SIZE_LIMIT: parseInt(process.env.EXPO_PUBLIC_FILE_SIZE_LIMIT || '4'),
 
     REGRAS: {
         REGRA_ADMIN: 'REGRA_ADMIN',
