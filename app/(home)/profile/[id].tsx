@@ -302,7 +302,7 @@ export default function Profile() {
     if (loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size={75} color={DefaultTheme.colors.primary} />
                 <Text>Carregando informações...</Text>
             </View>
         );
