@@ -17,48 +17,93 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
     aoClicarEmSair: () => void,
     aoClicarEmConfiguracoes: () => void
 }) {
+
     const { session } = useAuth();
+
     const isActive = (routeName: string) => {
         const focusedRoute = state.routes[state.index].name;
         return focusedRoute === routeName;
     };
-    const themeSo = useColorScheme();
+
+    const theme = useColorScheme();
+
+    const themeSo = theme as 'light' | 'dark';
 
     const { DefaultTheme, theme: themeContext } = useAppThemeContext();
 
     const styles = stylesTeste(DefaultTheme);
 
-    const temaPersonalizado = <A, B, C>(tipoEstilo: 'icone' | 'component', temaContexto: "light" | "dark" | "automatic", temaSo: "light" | "dark", ativo: boolean, valor1: A, valor2: B, valor?: C): A | B | C => {
+    const temaPersonalizadoButton = <A, B>(ativo: boolean, valor1: A, valor2: B): A | B => {
 
-        if (tipoEstilo === 'icone') {
-            if (temaContexto === 'automatic') {
-                if (temaSo === 'light' && ativo) {
-                    return valor1;
-                } else if (temaSo === 'dark' && ativo) {
-                    return valor1;
-                } else if (temaSo === 'light' && !ativo) {
-                    return valor2;
-                } else {
-                    return valor1;
-                }
-            } else if (temaContexto === 'light') {
-                if (ativo) {
-                    return valor1;
-                } else {
-                    return valor2;
-                }
-            } else {
-                if (ativo) {
-                    return valor1;
-                } else {
-                    return valor2;
-                }
-                // lógica restante
-            };
+        if (ativo) {
+            return valor1;
         } else {
-            return valor as C;
+            return valor2;
         }
 
+    }
+
+    const temaPersonalizadoIcone = <A, B>(temaContexto: "light" | "dark" | "automatic", temaSo: "light" | "dark", ativo: boolean, valor1: A, valor2: B): A | B => {
+
+        if (temaContexto === 'automatic') {
+            if (temaSo === 'light' && ativo) {
+                return valor1;
+            } else if (temaSo === 'dark' && ativo) {
+                return valor1;
+            } else if (temaSo === 'light' && !ativo) {
+                return valor2;
+            } else {
+                return valor1;
+            }
+        } else if (temaContexto === 'light') {
+            if (ativo) {
+                return valor1;
+            } else if (!ativo) {
+                return valor2;
+            } else {
+                return valor1;
+            }
+        } else {
+            if (ativo) {
+                return valor1;
+            } else if (!ativo) {
+                return valor1;
+            } else {
+                return valor2;
+            }
+        };
+
+    }
+
+    const temaPersonalizadoComponent = <A, B, C>(temaContexto: "light" | "dark" | "automatic", temaSo: "light" | "dark", ativo: boolean, valor1: A, valor2: B, valor3: C): A | B | C => {
+
+        if (temaContexto === 'automatic') {
+            if (temaSo === 'light' && ativo) {
+                return valor1;
+            } else if (temaSo === 'dark' && ativo) {
+                return valor1;
+            } else if (temaSo === 'light' && !ativo) {
+                return valor2;
+            } else {
+                return valor3;
+            }
+        } else if (temaContexto === 'light') {
+            if (ativo) {
+                return valor1;
+            } else if (!ativo) {
+                return valor2;
+            } else {
+                return valor2;
+            }
+        } else {
+            if (ativo) {
+                return valor1;
+            } else if (!ativo) {
+                return valor3;
+            } else {
+                return valor3;
+            }
+        }
 
     }
 
@@ -66,16 +111,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
         <View style={styles.container}>
             {/* Opção Home */}
             <TouchableOpacity
-                style={[styles.option, isActive('index') && styles.activeOption]}
+                style={temaPersonalizadoButton(isActive('index'), styles.activeOption, styles.option)}
                 onPress={() => router.push({ pathname: '/', params: { filter: '', page: '1' } })}
             >
                 <View style={styles.optionContent}>
                     <MaterialIcons
                         name="home"
                         size={28}
-                        color={temaPersonalizado('icone', themeContext, themeSo as 'light' | 'dark', isActive('index'), '#FFF', '#000')}
+                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive('index'), '#FFF', '#000')}
                     />
-                    <Text style={[(themeSo === 'light' && isActive('index')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('index')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('index')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                         Blog
                     </Text>
                 </View>
@@ -83,13 +128,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_PROFESSOR]) && (
                 <TouchableOpacity
-                    style={[styles.option, isActive('login') && styles.activeOption]}
+                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="post-add" size={28}
-                            color={(themeSo === 'light' && isActive('login')) ? '#FFF' : (themeSo === 'dark' && isActive('login')) ? '#FFF' : (themeSo === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
-                        <Text style={[(themeSo === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                        <MaterialIcons
+                            name="post-add"
+                            size={28}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')}
+                        />
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Posts
                         </Text>
                     </View>
@@ -98,13 +146,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_USUARIO]) && (
                 <TouchableOpacity
-                    style={[styles.option, isActive('login') && styles.activeOption]}
+                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="manage-accounts" size={28}
-                            color={(themeSo === 'light' && isActive('login')) ? '#FFF' : (themeSo === 'dark' && isActive('login')) ? '#FFF' : (themeSo === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
-                        <Text style={[(themeSo === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                        <MaterialIcons
+                            name="manage-accounts"
+                            size={28}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')}
+                        />
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Usuários
                         </Text>
                     </View>
@@ -118,38 +169,45 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
 
             {/* Opção Configurações */}
             <TouchableOpacity
-                style={[styles.option, isActive('settings/index') && styles.activeOption]}
+                style={temaPersonalizadoButton(isActive('settings/index'), styles.activeOption, styles.option)}
                 onPress={aoClicarEmConfiguracoes}>
                 <View style={styles.optionContent}>
-                    <MaterialIcons name="settings" size={28}
-                        color={(themeSo === 'light' && isActive('settings/index')) ? '#FFF' : (themeSo === 'dark' && isActive('settings/index')) ? '#FFF' : (themeSo === 'light' && !isActive('settings/index')) ? '#000' : '#FFF'} />
-                    <Text style={[(themeSo === 'light' && isActive('settings/index')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('settings/index')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('settings/index')) ? styles.optionTextDark : styles.optionTextWhite]}>
-                        Configurações</Text>
+                    <MaterialIcons
+                        name="settings"
+                        size={28}
+                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive('settings/index'), '#FFF', '#000')}
+                    />
+                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('settings/index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        Configurações
+                    </Text>
                 </View>
             </TouchableOpacity>
 
             {session ? (
                 <TouchableOpacity
-                    style={[styles.option, isActive('profile/[id]') && styles.activeOption]}
+                    style={temaPersonalizadoButton(isActive('profile/[id]'), styles.activeOption, styles.option)}
                     onPress={aoClicarEmMinhaConta}
                 >
                     <View style={styles.optionContent}>
-                        <MaterialIcons name="account-circle" size={24}
-                            color={(themeSo === 'light' && isActive('profile/[id]')) ? '#FFF' : (themeSo === 'dark' && isActive('profile/[id]')) ? '#FFF' : (themeSo === 'light' && !isActive('profile/[id]')) ? '#000' : '#FFF'} />
-                        <Text style={[(themeSo === 'light' && isActive('profile/[id]')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('profile/[id]')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('profile/[id]')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                        <MaterialIcons
+                            name="account-circle"
+                            size={24}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('profile/[id]'), '#FFF', '#000')}
+                        />
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('profile/[id]'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Minha Conta
                         </Text>
                     </View>
                 </TouchableOpacity>
             ) : (
                 <TouchableOpacity
-                    style={[styles.option, isActive('login') && styles.activeOption]}
+                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
                         <SimpleLineIcons name="login" size={24}
-                            color={(themeSo === 'light' && isActive('login')) ? '#FFF' : (themeSo === 'dark' && isActive('login')) ? '#FFF' : (themeSo === 'light' && !isActive('login')) ? '#000' : '#FFF'} />
-                        <Text style={[(themeSo === 'light' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'dark' && isActive('login')) ? styles.optionActiveTextWhite : (themeSo === 'light' && !isActive('login')) ? styles.optionTextDark : styles.optionTextWhite]}>
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')} />
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Acessar Conta
                         </Text>
                     </View>
@@ -158,14 +216,17 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
 
             {/* Opção Sair (se houver token) */}
             {session?.token && (
-                <TouchableOpacity style={styles.option} onPress={aoClicarEmSair}>
+                <TouchableOpacity
+                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
+                    onPress={aoClicarEmSair}
+                >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="logout"
                             size={28}
-                            color={themeSo === 'light' ? '#000' : '#FFF'} // Alterei para garantir contraste
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')} // Alterei para garantir contraste
                         />
-                        <Text style={[themeSo === 'light' ? styles.optionTextDark : styles.optionTextWhite]}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Sair
                         </Text>
                     </View>
