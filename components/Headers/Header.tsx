@@ -23,22 +23,22 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
   return (
     <View
-      style={styles.headerContainer}
+      style={{ flexDirection: 'column' }}
     >
-      {props.route.name != 'index' ? (
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
-        </TouchableOpacity>
-      ) : (
-        <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
-          <MaterialIcons name="home" size={28} color="#FFF" />
-        </Link>
-      )
-      }
+      <View style={styles.headerContainer}>
+        {props.route.name != 'index' ? (
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
+          </TouchableOpacity>
+        ) : (
+          <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
+            <MaterialIcons name="home" size={28} color="#FFF" />
+          </Link>
+        )
+        }
 
 
-      {
-        props.route.name === 'index' ? (
+        {(props.route.name === 'index' || props.route.name === 'posts/private/index') ? (
           <View style={styles.searchContainer}>
             <TextInput
               placeholder={Environment.INPUT_DE_BUSCA}
@@ -64,17 +64,27 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             {props.route.name === 'profile/[id]' && (
               <Text style={styles.sectionTitle}>Minha Conta</Text>
             )}
-            {props.route.name === 'post/[id]' && (
+            {props.route.name === 'posts/public/detail/[id]' && (
               <Text style={styles.sectionTitle}>Post</Text>
             )}
-
           </View>
         )
-      }
+        }
 
-      <TouchableOpacity>
-        <Ionicons onPress={() => props.navigation.toggleDrawer()} name="menu" size={28} color="#FFF" />
-      </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons onPress={() => props.navigation.toggleDrawer()} name="menu" size={28} color="#FFF" />
+        </TouchableOpacity>
+
+      </View>
+
+      {props.route.name === 'posts/private/index' && (
+        <View style={styles.headerContainerButton}>
+          <TouchableOpacity style={styles.buttonAddContainer}>
+            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary: '#FFF'} />
+            <Text style={styles.buttonTextUpload}>Novo Post</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
     </View>
   );
@@ -82,6 +92,25 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
 const stylesTeste = (theme: Theme) => {
   return StyleSheet.create({
+    buttonAddContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.dark ? '#FFF' : theme.colors.primary,
+      borderRadius: 8,  // Cantos arredondados
+      paddingVertical: 12,
+      flex: 1,
+      paddingHorizontal: 12
+    },
+    iconButton: {
+      marginRight: 8,
+    },
+    buttonTextUpload: {
+      color: theme.dark ? theme.colors.primary : '#FFF',
+      fontSize: 15,
+      fontWeight: "bold",
+      marginLeft: 2, // Espaço entre o ícone e o texto
+    },
     headerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -90,6 +119,15 @@ const stylesTeste = (theme: Theme) => {
       paddingVertical: 15,
       gap: 15,
       backgroundColor: theme.colors.primary,
+    },
+    headerContainerButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'transparent',
+      marginTop: 16,
+      marginBottom: 16,
+      paddingHorizontal: 10,
     },
     searchContainer: {
       flexDirection: 'row',

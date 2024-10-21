@@ -9,9 +9,12 @@ import { Theme } from "@react-navigation/native";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 
 
-export default function DrawerContent({ state, navigation, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair, aoClicarEmConfiguracoes }: {
+export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoClicarEmGerenciarPosts, aoClicarEmGerenciarUsuarios, aoClicarEmAcessarConta, aoClicarEmMinhaConta, aoClicarEmSair, aoClicarEmConfiguracoes }: {
     state: DrawerContentComponentProps['state'],
     navigation: DrawerContentComponentProps['navigation'],
+    aoClicarEmBlog: () => void,
+    aoClicarEmGerenciarPosts: () => void,
+    aoClicarEmGerenciarUsuarios: () => void,
     aoClicarEmAcessarConta: () => void,
     aoClicarEmMinhaConta: () => void,
     aoClicarEmSair: () => void,
@@ -112,7 +115,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             {/* Opção Home */}
             <TouchableOpacity
                 style={temaPersonalizadoButton(isActive('index'), styles.activeOption, styles.option)}
-                onPress={() => router.push({ pathname: '/', params: { filter: '', page: '1' } })}
+                onPress={aoClicarEmBlog}
             >
                 <View style={styles.optionContent}>
                     <MaterialIcons
@@ -128,16 +131,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_PROFESSOR]) && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
-                    onPress={aoClicarEmAcessarConta}
+                    style={temaPersonalizadoButton(isActive('posts/private/index'), styles.activeOption, styles.option)}
+                    onPress={aoClicarEmGerenciarPosts}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="post-add"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('posts/private/index'), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('posts/private/index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Posts
                         </Text>
                     </View>
@@ -147,7 +150,7 @@ export default function DrawerContent({ state, navigation, aoClicarEmAcessarCont
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_USUARIO]) && (
                 <TouchableOpacity
                     style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
-                    onPress={aoClicarEmAcessarConta}
+                    onPress={aoClicarEmGerenciarUsuarios}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons

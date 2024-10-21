@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 import { Theme } from "@react-navigation/native";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 
-export default function Post() {
+export default function DetailPublicPost() {
 
     const { id } = useLocalSearchParams();
     const [post, setPost] = useState<IPostCompleto | null>(null);

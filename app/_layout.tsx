@@ -27,17 +27,15 @@ export default function RootLayout() {
 
   useEffect(() => {
     setTheme(getTheme());
+    StatusBar.setTranslucent(true);
+    StatusBar.setBackgroundColor(theme.colors.primary);
+    StatusBar.setBarStyle('light-content');
+
   }, [systemColorScheme]);
 
   return (
     <SafeAreaView style={styles.container}>
 
-      <StatusBar
-        barStyle={'light-content'}
-        backgroundColor={theme.colors.primary}
-        translucent={true}
-        animated={true}
-      />
 
       <AppThemeProvider>
         <AuthProvider>

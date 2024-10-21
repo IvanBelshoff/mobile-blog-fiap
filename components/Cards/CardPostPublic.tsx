@@ -1,18 +1,17 @@
 import { useAppThemeContext } from '@/contexts/ThemeContext';
 import { IPosts } from '@/services/Posts/postsService';
 import { Theme } from '@react-navigation/native';
-import { Link } from 'expo-router';
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-const CardPost = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarEmPost: () => void }) => {
+const CardPostPublic = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarEmPost: () => void }) => {
 
     const { DefaultTheme } = useAppThemeContext();
 
+    // Passe o índice para a função de estilos
     const styles = stylesTeste(DefaultTheme);
 
     return (
-
         <TouchableOpacity style={styles.card} onPress={aoClicarEmPost}>
 
             {/* Título centralizado */}
@@ -35,11 +34,11 @@ const CardPost = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoClicarE
                 </Text>
             </View>
 
-        </TouchableOpacity >
-
+        </TouchableOpacity>
     );
 });
 
+// Modifique a função para aceitar o índice
 const stylesTeste = (theme: Theme) => {
     return StyleSheet.create({
         card: {
@@ -78,4 +77,4 @@ const stylesTeste = (theme: Theme) => {
     });
 }
 
-export default CardPost;
+export default CardPostPublic;

@@ -21,7 +21,6 @@ export default function HomeLayout() {
             <Drawer
                 initialRouteName='/'
                 backBehavior='initialRoute'
-                
                 screenOptions={{
                     drawerPosition: 'right',
                     drawerType: 'front',
@@ -30,6 +29,15 @@ export default function HomeLayout() {
                     <DrawerContent
                         state={props.state}
                         navigation={props.navigation}
+                        aoClicarEmBlog={() => {
+                            router.push({ pathname: '/', params: { filter: '', page: '1' } })
+                        }}
+                        aoClicarEmGerenciarPosts={() => {
+                            router.push('/posts/private')
+                        }}
+                        aoClicarEmGerenciarUsuarios={() => {
+                            router.push('/')
+                        }}
                         aoClicarEmAcessarConta={() => {
                             router.push('/login')
                         }}
@@ -74,7 +82,7 @@ export default function HomeLayout() {
                 />
 
                 <Drawer.Screen
-                    name="post/[id]"
+                    name="posts/public/detail/[id]"
                     options={{
                         header: (props) => (
                             <Header
@@ -82,6 +90,31 @@ export default function HomeLayout() {
                                 onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
                             />
                         )
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="posts/private/detail/[id]"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        )
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="posts/private/index"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        ),
+                        
                     }}
                 />
 
@@ -96,6 +129,7 @@ export default function HomeLayout() {
                         )
                     }}
                 />
+
             </Drawer>
         </GestureHandlerRootView>
     );

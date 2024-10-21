@@ -4,9 +4,9 @@ import { AxiosError } from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { IPosts, PostsService } from '@/services/Posts/postsService';
-import CardPost from '@/components/Cards/CardPost';
 import { Environment } from '@/environment';
 import { useAppThemeContext } from '@/contexts/ThemeContext';
+import CardPostPublic from '@/components/Cards/CardPostPublic';
 
 export default function Index() {
 
@@ -107,12 +107,12 @@ export default function Index() {
         getItemLayout={(_, index) => (
           { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
         )}
-        renderItem={({ item }) =>
-          <CardPost
+        renderItem={({ item, index }) =>
+          <CardPostPublic
             post={item}
             aoClicarEmPost={() => {
               router.push({
-                pathname: '/post/[id]',
+                pathname: '/posts/public/detail/[id]',
                 params: { id: item.id.toString() || 0 }
               });
             }} />
