@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'; // Ícones do Expo
 import { DrawerHeaderProps } from '@react-navigation/drawer';
@@ -26,17 +26,24 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
       style={{ flexDirection: 'column' }}
     >
       <View style={styles.headerContainer}>
+
         {props.route.name != 'index' ? (
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
-          </TouchableOpacity>
+
+          (props.route.name === 'posts/private/new/index' || props.route.name === 'posts/private/detail/[id]') ? (
+            <Link href={'/posts/private'} style={{ cursor: 'pointer' }}>
+              <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
+            </Link>
+          ) : (
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
+            </TouchableOpacity>
+          )
+
         ) : (
           <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
             <MaterialIcons name="home" size={28} color="#FFF" />
           </Link>
-        )
-        }
-
+        )}
 
         {(props.route.name === 'index' || props.route.name === 'posts/private/index') ? (
           <View style={styles.searchContainer}>
@@ -67,6 +74,12 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             {props.route.name === 'posts/public/detail/[id]' && (
               <Text style={styles.sectionTitle}>Post</Text>
             )}
+            {props.route.name === 'posts/private/new/index' && (
+              <Text style={styles.sectionTitle}>Novo Post</Text>
+            )}
+            {props.route.name === 'posts/private/detail/[id]' && (
+              <Text style={styles.sectionTitle}>Editar Post</Text>
+            )}
           </View>
         )
         }
@@ -79,14 +92,14 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
       {props.route.name === 'posts/private/index' && (
         <View style={styles.headerContainerButton}>
-          <TouchableOpacity style={styles.buttonAddContainer}>
-            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary: '#FFF'} />
+          <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/posts/private/new')}>
+            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
             <Text style={styles.buttonTextUpload}>Novo Post</Text>
           </TouchableOpacity>
         </View>
       )}
 
-    </View>
+    </View >
   );
 }
 

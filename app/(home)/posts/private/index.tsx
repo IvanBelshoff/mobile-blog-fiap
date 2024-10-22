@@ -23,14 +23,14 @@ export default function PrivatePosts() {
     const params = useLocalSearchParams<{ filter: string, page: string }>();
     const [page, setPage] = useState<number>(parseInt(params?.page) || 1);
     const [viewArrowUp, setViewArrowUp] = useState<boolean>(false);
-    const [postOptions, setPostOptions] = useState<IPosts | null>(null);
+    const [postOptions, setPostOptions] = useState<Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'> | null>(null);
     const [openbottomSheetRef, setOpenBottomSheetRef] = useState<boolean>(false);
 
     const fetchData = async (page: string, filter: string): Promise<IPosts[] | AxiosError> => {
 
         setLoading(true);
 
-        const result = await PostsService.getAllLogged(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
+        const result = await PostsService.getAll(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
 
         if (result instanceof AxiosError) {
             setLoading(false);
@@ -66,12 +66,6 @@ export default function PrivatePosts() {
             }
         });
     };
-
-    useEffect(() => {
-
-        console.log(DefaultTheme.colors.text)
-
-    }, [DefaultTheme]);
 
     useEffect(() => {
 
@@ -141,7 +135,7 @@ export default function PrivatePosts() {
     }, []);
 
     // Função para abrir o BottomSheet
-    const openBottomSheet = (post: IPosts) => {
+    const openBottomSheet = (post: Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'>) => {
         setPostOptions(post);
         if (openbottomSheetRef) {
             bottomSheetRef.current?.close(); // Fecha a folha completamente
@@ -175,7 +169,7 @@ export default function PrivatePosts() {
                         index={index}
                         aoClicarEmPost={() => {
                             router.push({
-                                pathname: '/posts/public/detail/[id]',
+                                pathname: '/posts/private/detail/[id]',
                                 params: { id: item.id.toString() || 0 }
                             });
                         }}
@@ -214,6 +208,7 @@ export default function PrivatePosts() {
                     <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
                 </View>
             )}
+
             {postOptions && (
                 <BottomSheet
                     ref={bottomSheetRef}
@@ -242,12 +237,14 @@ export default function PrivatePosts() {
                             />
                         </View>
 
-                        <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
-                                <Text style={styles.optionText}>Visualizar Post</Text>
-                            </TouchableOpacity>
-                        </View>
+                        {postOptions.visivel && (
+                            <View style={styles.optionContainer}>
+                                <TouchableOpacity style={styles.option}>
+                                    <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
+                                    <Text style={styles.optionText}>Visualizar Post</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
 
                         <View style={styles.divider} />
 
@@ -271,9 +268,112 @@ export default function PrivatePosts() {
                 </BottomSheet>
             )}
 
+            {/*{postOptions && (
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
+                    onChange={handleSheetChanges}
+                    enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
+                    onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
+                    handleStyle={{
+                        backgroundColor: DefaultTheme.colors.background,
+                        borderTopStartRadius: 15,
+                        borderTopEndRadius: 15,
+                        borderBottomColor: DefaultTheme.colors.border,
+                        borderBottomWidth: 1
+                    }}
+                    backgroundStyle={{ backgroundColor: DefaultTheme.colors.background }} // Estilo de fundo
+                    handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }} // Estilo do indicador
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+
+                        <View style={styles.imageContainer}>
+                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
+                            <Image
+                                source={{ uri: postOptions.foto?.url }}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                        </View>
+
+                        <View style={styles.optionsContainer}>
+
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="open-in-new" size={30} color={'#FFF'} />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="edit" size={30} color={'#FFF'} />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="delete" size={30} color={'#FFF'} />
+                            </TouchableOpacity>
+
+                        </View>
+
+                    </BottomSheetView>
+                </BottomSheet>
+            )}*/}
+
         </View>
     );
 }
+/*
+
+const stylesTeste = (theme: IThemeMaximized) => {
+    return StyleSheet.create({
+        contentContainer: {
+            flex: 1,
+            padding: 25,
+            gap: 10,
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+        },
+        imageContainer: {
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 25
+        },
+        titlePost: {
+            color: theme.colors.text,
+            fontSize: 20,
+            fontWeight: 'bold'
+        },
+        image: {
+            width: '100%',
+            height: 200,
+            borderRadius: 8,
+            marginBottom: 12,
+        },
+        optionsContainer: {
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 50,
+            alignItems: "center"
+        },
+        option: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: theme.colors.primary,
+            borderRadius: 8,  // Cantos arredondados
+            padding: 16
+        },
+        floatingButton: {
+            position: 'absolute',
+            bottom: 20, // distância do fundo da tela
+            right: 20,   // distância do lado esquerdo da tela
+            backgroundColor: theme.colors.primary, // cor do botão (você pode customizar)
+            borderRadius: 50,
+            padding: 15,
+            elevation: 5, // elevação para dar um efeito de sombra
+        }
+    });
+}
+ */
 
 const stylesTeste = (theme: IThemeMaximized) => {
     return StyleSheet.create({
@@ -333,4 +433,6 @@ const stylesTeste = (theme: IThemeMaximized) => {
         }
     });
 }
+
+
 

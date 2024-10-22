@@ -9,7 +9,6 @@ import { SafeAreaView, StatusBar, StyleSheet, useColorScheme } from 'react-nativ
 import { useEffect, useState } from 'react';
 import { DarkTheme } from '@/themes/Dark';
 
-
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -25,17 +24,16 @@ export default function RootLayout() {
     }
   };
 
+  StatusBar.setTranslucent(true);
+  StatusBar.setBackgroundColor(theme.colors.primary);
+  StatusBar.setBarStyle('light-content');
+
   useEffect(() => {
     setTheme(getTheme());
-    StatusBar.setTranslucent(true);
-    StatusBar.setBackgroundColor(theme.colors.primary);
-    StatusBar.setBarStyle('light-content');
-
   }, [systemColorScheme]);
 
   return (
     <SafeAreaView style={styles.container}>
-
 
       <AppThemeProvider>
         <AuthProvider>

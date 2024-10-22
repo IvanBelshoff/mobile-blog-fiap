@@ -2,9 +2,8 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-native";
-import { Ionicons, MaterialIcons, SimpleLineIcons, Feather } from '@expo/vector-icons';
+import { MaterialIcons, SimpleLineIcons } from '@expo/vector-icons';
 import { Environment } from "@/environment";
-import { router } from "expo-router";
 import { Theme } from "@react-navigation/native";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 
@@ -23,9 +22,11 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
     const { session } = useAuth();
 
-    const isActive = (routeName: string) => {
+    const isActive = (routesName: String[]) => {
         const focusedRoute = state.routes[state.index].name;
-        return focusedRoute === routeName;
+
+        return routesName.includes(focusedRoute);
+
     };
 
     const theme = useColorScheme();
@@ -114,16 +115,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
         <View style={styles.container}>
             {/* Opção Home */}
             <TouchableOpacity
-                style={temaPersonalizadoButton(isActive('index'), styles.activeOption, styles.option)}
+                style={temaPersonalizadoButton(isActive(['index', 'posts/public/detail/[id]']), styles.activeOption, styles.option)}
                 onPress={aoClicarEmBlog}
             >
                 <View style={styles.optionContent}>
                     <MaterialIcons
                         name="home"
                         size={28}
-                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive('index'), '#FFF', '#000')}
+                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['index', 'posts/public/detail/[id]']), '#FFF', '#000')}
                     />
-                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['index', 'posts/public/detail/[id]']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                         Blog
                     </Text>
                 </View>
@@ -131,16 +132,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_PROFESSOR]) && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('posts/private/index'), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['posts/private/index', 'posts/private/new/index']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmGerenciarPosts}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="post-add"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('posts/private/index'), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index']), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('posts/private/index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Posts
                         </Text>
                     </View>
@@ -149,16 +150,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_USUARIO]) && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['login']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmGerenciarUsuarios}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="manage-accounts"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['login']), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['login']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Usuários
                         </Text>
                     </View>
@@ -172,15 +173,15 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {/* Opção Configurações */}
             <TouchableOpacity
-                style={temaPersonalizadoButton(isActive('settings/index'), styles.activeOption, styles.option)}
+                style={temaPersonalizadoButton(isActive(['settings/index']), styles.activeOption, styles.option)}
                 onPress={aoClicarEmConfiguracoes}>
                 <View style={styles.optionContent}>
                     <MaterialIcons
                         name="settings"
                         size={28}
-                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive('settings/index'), '#FFF', '#000')}
+                        color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['settings/index']), '#FFF', '#000')}
                     />
-                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('settings/index'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                    <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['settings/index']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                         Configurações
                     </Text>
                 </View>
@@ -188,29 +189,29 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {session ? (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('profile/[id]'), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['profile/[id]']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmMinhaConta}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="account-circle"
                             size={24}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('profile/[id]'), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['profile/[id]']), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('profile/[id]'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['profile/[id]']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Minha Conta
                         </Text>
                     </View>
                 </TouchableOpacity>
             ) : (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['login']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmAcessarConta}
                 >
                     <View style={styles.optionContent}>
                         <SimpleLineIcons name="login" size={24}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')} />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['login']), '#FFF', '#000')} />
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['login']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Acessar Conta
                         </Text>
                     </View>
@@ -220,16 +221,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
             {/* Opção Sair (se houver token) */}
             {session?.token && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive('login'), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['login']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmSair}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="logout"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive('login'), '#FFF', '#000')} // Alterei para garantir contraste
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['login']), '#FFF', '#000')} // Alterei para garantir contraste
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive('login'), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['login']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Sair
                         </Text>
                     </View>

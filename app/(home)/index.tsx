@@ -23,7 +23,7 @@ export default function Index() {
 
     setLoading(true);
 
-    const result = await PostsService.getAll(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
+    const result = await PostsService.getAllLogged(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
 
     if (result instanceof AxiosError) {
       setLoading(false);

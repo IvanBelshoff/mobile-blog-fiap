@@ -270,7 +270,7 @@ const create = async (
     titulo?: string,
     conteudo?: string,
     visivel?: string,
-    foto?: File,
+    foto?: { uri: string; name: string; type: string },
 ): Promise<number | AxiosError> => {
     try {
         const formData = new FormData();
@@ -288,7 +288,7 @@ const create = async (
         );
 
         foto && (
-            formData.append('foto', foto)
+            formData.append('foto', foto as unknown as File)
         );
 
         const data = await Api().post('/posts', formData, {
