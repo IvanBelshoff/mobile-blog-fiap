@@ -8,7 +8,7 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, NativeSyntheticEvent, NativeScrollEvent, Image } from "react-native";
 import { Divider } from "react-native-paper";
 
 export default function PrivatePosts() {
@@ -23,7 +23,7 @@ export default function PrivatePosts() {
     const params = useLocalSearchParams<{ filter: string, page: string }>();
     const [page, setPage] = useState<number>(parseInt(params?.page) || 1);
     const [viewArrowUp, setViewArrowUp] = useState<boolean>(false);
-    const [idPost, setIdPost] = useState<number>(0);
+    const [postOptions, setPostOptions] = useState<IPosts | null>(null);
     const [openbottomSheetRef, setOpenBottomSheetRef] = useState<boolean>(false);
 
     const fetchData = async (page: string, filter: string): Promise<IPosts[] | AxiosError> => {
@@ -69,7 +69,7 @@ export default function PrivatePosts() {
 
     useEffect(() => {
 
-     console.log(DefaultTheme.colors.text)
+        console.log(DefaultTheme.colors.text)
 
     }, [DefaultTheme]);
 
@@ -141,8 +141,8 @@ export default function PrivatePosts() {
     }, []);
 
     // Função para abrir o BottomSheet
-    const openBottomSheet = (id: number) => {
-        setIdPost(id);
+    const openBottomSheet = (post: IPosts) => {
+        setPostOptions(post);
         if (openbottomSheetRef) {
             bottomSheetRef.current?.close(); // Fecha a folha completamente
 
@@ -214,34 +214,62 @@ export default function PrivatePosts() {
                     <ActivityIndicator size="large" color={DefaultTheme.colors.primary} />
                 </View>
             )}
+            {postOptions && (
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
+                    onChange={handleSheetChanges}
+                    enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
+                    onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
+                    handleStyle={{
+                        backgroundColor: DefaultTheme.colors.background,
+                        borderTopStartRadius: 15,
+                        borderTopEndRadius: 15,
+                        borderBottomColor: DefaultTheme.colors.border,
+                        borderBottomWidth: 1
+                    }}
+                    backgroundStyle={{ backgroundColor: DefaultTheme.colors.background }} // Estilo de fundo
+                    handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }} // Estilo do indicador
+                >
+                    <BottomSheetView style={styles.contentContainer}>
 
-            <BottomSheet
-                ref={bottomSheetRef}
-                snapPoints={['40%']} // Defina os pontos de snap em porcentagens ou valores
-                onChange={handleSheetChanges}
-                enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
-                onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
-            >
-                <BottomSheetView style={styles.contentContainer}>
-                    <View style={styles.optionContainer}>
-                        <TouchableOpacity style={styles.option}>
-                            <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.text} />
-                            <Text style={styles.optionText}>Visualizar Post</Text>
-                        </TouchableOpacity>
-                        <Divider />
-                        <TouchableOpacity style={styles.option}>
-                            <MaterialIcons name="edit" size={24} color={DefaultTheme.colors.text} />
-                            <Text style={styles.optionText}>Editar Post</Text>
-                        </TouchableOpacity>
-                        <Divider />
-                        <TouchableOpacity style={styles.option}>
-                            <MaterialIcons name="delete" size={24} color="red" />
-                            <Text style={[styles.optionText, { color: 'red' }]}>Excluir Post</Text>
-                        </TouchableOpacity>
-                    </View>
-                </BottomSheetView>
-            </BottomSheet>
+                        <View style={styles.imageContainer}>
+                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
+                            <Image
+                                source={{ uri: postOptions.foto?.url }}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                        </View>
 
+                        <View style={styles.optionContainer}>
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
+                                <Text style={styles.optionText}>Visualizar Post</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.optionContainer}>
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="edit" size={24} color={DefaultTheme.colors.primary} />
+                                <Text style={styles.optionText}>Editar Post</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.optionContainer}>
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="delete" size={24} color={DefaultTheme.colors.primary} />
+                                <Text style={styles.optionText}>Excluir Post</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </BottomSheetView>
+                </BottomSheet>
+            )}
 
         </View>
     );
@@ -251,8 +279,48 @@ const stylesTeste = (theme: IThemeMaximized) => {
     return StyleSheet.create({
         contentContainer: {
             flex: 1,
-            padding: 36,
+            gap: 15,
+            padding: 25,
+            justifyContent: 'flex-start',
             alignItems: 'center',
+        },
+        imageContainer: {
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 25
+        },
+        titlePost: {
+            color: theme.colors.text,
+            fontSize: 20,
+            fontWeight: 'bold'
+        },
+        image: {
+            width: '100%',
+            height: 200,
+            borderRadius: 8,
+            marginBottom: 12,
+        },
+        optionContainer: {
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        option: {
+            flexDirection: 'row', // Coloca o ícone e o texto lado a lado
+            alignItems: 'center'
+        },
+        optionText: {
+            fontSize: 18, // Aumenta o tamanho da fonte
+            color: theme.colors.text, // Cor do texto
+            marginLeft: 10, // Espaço entre o ícone e o texto
+            fontWeight: 'light'
+        },
+        divider: {
+            width: '100%',
+            justifyContent: 'center',
+            backgroundColor: theme.colors.border,
+            height: 1
         },
         floatingButton: {
             position: 'absolute',
@@ -262,22 +330,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
             borderRadius: 50,
             padding: 15,
             elevation: 5, // elevação para dar um efeito de sombra
-        },
-        optionContainer: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        option: {
-            flexDirection: 'row', // Coloca o ícone e o texto lado a lado
-            alignItems: 'center',
-            paddingVertical: 12
-        },
-        optionText: {
-            fontSize: 18, // Aumenta o tamanho da fonte
-            color: '#000', // Cor do texto
-            marginLeft: 10, // Espaço entre o ícone e o texto
-        },
+        }
     });
 }
 

@@ -1,12 +1,11 @@
 import { useAppThemeContext } from '@/contexts/ThemeContext';
 import { IPosts } from '@/services/Posts/postsService';
 import { Theme } from '@react-navigation/native';
-import React, { useCallback, useRef } from 'react';
+import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
-const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomSheet, index }: { post: IPosts, aoClicarEmPost: () => void, aoClicarEmBottomSheet: (id: number) => void, index: number }) => {
+const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomSheet, index }: { post: IPosts, aoClicarEmPost: () => void, aoClicarEmBottomSheet: (post: IPosts) => void, index: number }) => {
 
     const { DefaultTheme } = useAppThemeContext();
 
@@ -39,7 +38,7 @@ const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomShee
                 </View>
 
                 {/* Menu suspenso com ícone de opções */}
-                <TouchableOpacity onPress={() => aoClicarEmBottomSheet(post.id)} style={{ alignItems: 'flex-end' }}>
+                <TouchableOpacity onPress={() => aoClicarEmBottomSheet(post)} style={{ alignItems: 'flex-end' }}>
                     <MaterialIcons name="more-vert" size={24} color={'#FFF'} />
                 </TouchableOpacity>
             </View>
