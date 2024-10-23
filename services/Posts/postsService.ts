@@ -172,7 +172,7 @@ const getById = async (id: number): Promise<IPostCompleto | AxiosError> => {
 const deleteById = async (id: number): Promise<void | AxiosError> => {
     try {
         const data = await Api().delete(`/posts/${id}`);
-        
+
         if (data.status == 204) {
             return;
         }
@@ -198,8 +198,10 @@ const updateById = async (
     titulo?: string,
     conteudo?: string,
     visivel?: string,
-    foto?: File,
+    foto?: { uri: string; name: string; type: string },
 ): Promise<void | AxiosError> => {
+
+    console.log(id, titulo, conteudo, visivel, foto)
     try {
 
         const formData = new FormData();
@@ -217,7 +219,7 @@ const updateById = async (
         );
 
         foto && (
-            formData.append('foto', foto)
+            formData.append('foto', foto as unknown as File)
         );
 
         const data = await Api().put(`/posts/${id}`, formData, {
@@ -234,6 +236,7 @@ const updateById = async (
 
     } catch (error) {
 
+        console.log('error')
         if (axios.isAxiosError(error)) {
             return error;
         }

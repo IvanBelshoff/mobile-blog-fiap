@@ -5,7 +5,6 @@ import { IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Theme } from "@react-navigation/native";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import ContentCopy from "@/components/CopyContent";

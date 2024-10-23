@@ -132,16 +132,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_PROFESSOR]) && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive(['posts/private/index', 'posts/private/new/index']), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['posts/private/index', 'posts/private/new/index', 'posts/private/detail/[id]']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmGerenciarPosts}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="post-add"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index']), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index', 'posts/private/detail/[id]']), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['posts/private/index', 'posts/private/new/index', 'posts/private/detail/[id]']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Posts
                         </Text>
                     </View>

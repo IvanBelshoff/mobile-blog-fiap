@@ -107,7 +107,7 @@ export default function Index() {
         getItemLayout={(_, index) => (
           { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
         )}
-        renderItem={({ item, index }) =>
+        renderItem={({ item }) =>
           <CardPostPublic
             post={item}
             aoClicarEmPost={() => {
