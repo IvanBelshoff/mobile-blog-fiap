@@ -1,6 +1,6 @@
 import { PostsService } from "@/services/Posts/postsService";
 import { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Alert, StyleSheet, TextInput, Button, ActivityIndicator, Image, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { Environment } from "@/environment";
@@ -56,10 +56,14 @@ interface INovoPostAction {
 
 export default function NewPostPrivate() {
     const [loading, setLoading] = useState<boolean>(false);
-    const [PostForm, setPostForm] = useState<IPostForm | null>(null);
+    const [PostForm, setPostForm] = useState<IPostForm>({
+        titulo: undefined,
+        descricao: undefined,
+        foto: undefined,
+        visivel: true
+    });
     const [error, setError] = useState<INovoPostAction | undefined>(undefined);
     const [statePhoto, setStatePhoto] = useState<'default' | 'preview'>('default');
-    const [selectedImage, setSelectedImage] = useState<{ uri: string; name: string; type: string } | null>(null);
     const [limitedFileSize, setLimitedFileSize] = useState<boolean>(true);
 
     const { DefaultTheme } = useAppThemeContext();
@@ -74,6 +78,7 @@ export default function NewPostPrivate() {
             const response = await PostsService.create(PostForm?.titulo, PostForm?.descricao, PostForm?.visivel == true ? 'true' : 'false', PostForm?.foto);
 
             if (response instanceof AxiosError) {
+                setLoading(false);
                 const errors = (response as IActionNovoPost).response?.data.errors;
                 console.log('Erros: ' + errors?.body?.conteudo);
                 setError({
@@ -86,28 +91,33 @@ export default function NewPostPrivate() {
                         }
                     }
                 });
+
             } else {
                 Alert.alert("Sucesso", "Post criado com sucesso!");
                 setPostForm({
                     titulo: undefined,
                     descricao: undefined,
                     foto: undefined,
-                    visivel: undefined
+                    visivel: true
                 });
+                setStatePhoto('default');
+                setLoading(false);
             }
         } catch (error) {
             Alert.alert("Erro", "Falha ao enviar o post.");
             console.error(error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const handleCancelSubmit = () => {
         console.log('Cancelar');
-        setSelectedImage(null);
+        setPostForm({ ...PostForm, foto: undefined });
         setStatePhoto('default');
         setLimitedFileSize(true);
+    }
+
+    const resetForm = () => {
+        setPostForm({ ...PostForm, descricao: undefined, titulo: undefined });
     }
 
     const checkFileSizeBoolean = (fileSizeInBytes: number, maxSizeInMB: number): boolean => {
@@ -158,10 +168,38 @@ export default function NewPostPrivate() {
 
             console.log('Imagem' + image.uri);
             // Armazenar a imagem no estado
-            setSelectedImage(image);
+            setPostForm({ ...PostForm, foto: image });
             setStatePhoto('preview');
         }
     };
+
+    useEffect(() => {
+        if (error) {
+            setTimeout(() => setError({
+                errors: {
+                    default: undefined,
+                    body: {
+                        conteudo: undefined,
+                        titulo: undefined,
+                        visivel: undefined
+                    }
+                },
+                success: {
+                    message: undefined
+                }
+            }), 20000);
+        }
+    }, [error]);
+
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size={50} color={DefaultTheme.colors.primary} />
+                <Text style={{ color: DefaultTheme.colors.text }}>Carregando informações...</Text>
+            </View>
+        );
+    }
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -185,7 +223,7 @@ export default function NewPostPrivate() {
                             />
                         ) : (
                             <Image
-                                source={{ uri: selectedImage?.uri }} // Mostra a imagem selecionada ou a atual
+                                source={{ uri: PostForm?.foto?.uri }} // Mostra a imagem selecionada ou a atual
                                 style={styles.image}
                                 resizeMode="cover"
                             />
@@ -199,17 +237,29 @@ export default function NewPostPrivate() {
 
 
                         <View style={styles.buttonContainer}>
-                            {selectedImage ? (
-                                <TouchableOpacity style={styles.buttonDelete} onPress={handleCancelSubmit}>
-                                    <MaterialIcons name="cancel" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
-                                    <Text style={styles.buttonTextDelete}>Cancelar Alteração</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
-                                    <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
-                                    <Text style={styles.buttonTextUpload}>Carregar Capa</Text>
-                                </TouchableOpacity>
-                            )}
+                            <>
+                                {PostForm?.foto ? (
+                                    <TouchableOpacity style={styles.buttonDelete} onPress={handleCancelSubmit}>
+                                        <MaterialIcons name="cancel" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
+                                        <Text style={styles.buttonTextDelete}>Cancelar Alteração</Text>
+                                    </TouchableOpacity>
+                                ) : (
+
+                                    <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
+                                        <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
+                                        <Text style={styles.buttonTextUpload}>Carregar Capa</Text>
+                                    </TouchableOpacity>
+
+
+                                )}
+                                {(PostForm?.titulo || PostForm?.descricao) && (
+                                    <TouchableOpacity style={styles.buttonDelete} onPress={resetForm}>
+                                        <MaterialIcons name="clear-all" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
+                                        <Text style={styles.buttonTextDelete}>Limpar</Text>
+                                    </TouchableOpacity>
+                                )}
+
+                            </>
                         </View>
 
                     </View>
@@ -220,27 +270,41 @@ export default function NewPostPrivate() {
                         <View style={{ flexDirection: 'column' }}>
                             <Text style={styles.label}>Título</Text>
                             <TextInput
+                                placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
                                 style={styles.input}
                                 value={PostForm?.titulo}
                                 onChangeText={text => setPostForm({ ...PostForm, titulo: text })}
                                 placeholder="Digite o título"
                             />
+                            {error?.errors?.body?.titulo && (
+                                <Text style={styles.error}>{error?.errors?.body?.titulo}</Text>
+                            )}
                         </View>
+
 
                         <View style={{ flexDirection: 'column' }}>
                             <Text style={styles.label}>Selecione a Visibilidade</Text>
                             <RNPickerSelect
-                                onValueChange={(value:boolean) => setPostForm({ ...PostForm, visivel: value })}
+                                onValueChange={(value: 'true' | 'false') => setPostForm({ ...PostForm, visivel: value === 'true' ? true : false })}
                                 items={[
-                                    { label: 'Visível', value: true },
-                                    { label: 'Não Visível', value: false }
+                                    { label: 'Visível', value: 'true' },
+                                    { label: 'Não Visível', value: 'false' }
                                 ]}
-                                placeholder={{ label: "Selecione uma opção", value: null }}
+                                value={PostForm?.visivel == true ? 'true' : 'false'}
+
+                                placeholder={{ label: "Selecione uma opção", value: 'true' }}
+                                darkTheme={DefaultTheme.dark}
                                 style={{
                                     viewContainer: {
                                         borderWidth: 1,
-                                        borderColor: '#ccc',
+                                        borderColor: DefaultTheme.colors.border,
                                         borderRadius: 8,
+                                    },
+                                    inputAndroid: {
+                                        color: DefaultTheme.colors.text,
+                                    },
+                                    placeholder: {
+                                        color: DefaultTheme.colors.text,
                                     }
                                 }}
                             />
@@ -249,15 +313,19 @@ export default function NewPostPrivate() {
                         <View style={{ flexDirection: 'column' }}>
                             <Text style={styles.label}>Conteúdo</Text>
                             <TextInput
+                                placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
                                 style={[styles.input, styles.textArea]}
                                 value={PostForm?.descricao}
                                 onChangeText={text => setPostForm({ ...PostForm, descricao: text })}
                                 placeholder="Digite o conteúdo"
                                 multiline
                             />
+                            {error?.errors?.body?.conteudo && (
+                                <Text style={styles.error}>{error?.errors?.body?.titulo}</Text>
+                            )}
                         </View>
 
-                        {(PostForm?.titulo || PostForm?.descricao || PostForm?.foto || PostForm?.visivel) && (
+                        {(PostForm?.titulo || PostForm?.descricao || PostForm?.foto) && (
 
                             <TouchableOpacity style={styles.confirmButton} onPress={handleSubmitPost}>
                                 <MaterialIcons name="post-add" size={24} color={'#FFF'} style={styles.iconButton} />
@@ -285,14 +353,15 @@ const stylesTeste = (theme: IThemeMaximized) => {
         label: {
             fontSize: 16,
             marginBottom: 8,
-            color: '#333',
+            color: theme.colors.text,
         },
         input: {
             borderWidth: 1,
-            borderColor: '#ccc',
-            borderRadius: 4,
+            borderColor: theme.colors.border,
+            borderRadius: 8,
             padding: 12,
             fontSize: 16,
+            color: theme.colors.text,
         },
         textArea: {
             height: 100,
@@ -306,7 +375,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         },
         imageContainer: {
             alignItems: 'center',
-            marginBottom: 10,
+            marginBottom: 16,
         },
         image: {
             width: '100%',
@@ -480,6 +549,8 @@ const stylesTeste = (theme: IThemeMaximized) => {
         error: {
             fontSize: 18,
             color: theme.actions.error,
+            alignItems: 'center',
+            justifyContent: 'center',
         },
         ErrorContainer: {
             alignItems: 'center',

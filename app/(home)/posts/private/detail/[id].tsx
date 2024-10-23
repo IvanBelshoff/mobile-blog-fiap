@@ -5,7 +5,7 @@ export default function DetailPostPrivate() {
 
     return (
         <View>
-            <Text>DetailPostPrivate</Text>
+            <Text style={{color: '#FFF'}}>DetailPostPrivate</Text>
         </View>
     )
 }

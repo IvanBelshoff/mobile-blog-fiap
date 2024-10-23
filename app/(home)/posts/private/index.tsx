@@ -8,13 +8,14 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, NativeSyntheticEvent, NativeScrollEvent, Image } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, NativeSyntheticEvent, NativeScrollEvent, Image, Alert } from "react-native";
 import { Divider } from "react-native-paper";
 
 export default function PrivatePosts() {
 
     const [posts, setPosts] = useState<IPosts[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { DefaultTheme } = useAppThemeContext()
     const ITEM_HEIGHT = 300; // Defina um valor que corresponda ao tamanho do CardPost
@@ -42,6 +43,60 @@ export default function PrivatePosts() {
         }
 
     };
+
+    const handleDeletePost = async (id: number) => {
+
+        try {
+            setLoadingDelete(true);
+
+            const response = await PostsService.deleteById(id);
+
+            if (response instanceof AxiosError) {
+                setLoadingDelete(false);
+                console.log(response.message);
+
+            } else {
+                Alert.alert("Sucesso", "Post excluido com sucesso!");
+                setPostOptions(null);
+                flatListRef.current?.scrollToOffset({ offset: 0 });
+                fetchData(params.page || '1', params.filter).then((data) => {
+                    if (data instanceof AxiosError) {
+                        setError(data.message);
+
+                    } else {
+                        setPosts(data);
+                    }
+                }).finally(() => {
+                    bottomSheetRef.current?.close();
+                    setLoadingDelete(false);
+                });
+            }
+        } catch (error) {
+            Alert.alert("Erro", "Falha ao enviar o post.");
+            console.error(error);
+        }
+    };
+
+    const confirmDeletePost = (id: number) => {
+        Alert.alert(
+            "Confirmação de Exclusão",
+            "Tem certeza de que deseja excluir este post?",
+            [
+                {
+                    text: "Cancelar",
+                    onPress: () => console.log("Exclusão cancelada"),
+                    style: "cancel", // Estilo de botão cancelado
+                },
+                {
+                    text: "Sim",
+                    onPress: () => handleDeletePost(id), // Se o usuário confirmar, executa a exclusão
+                    style: "destructive", // Estilo de botão de ação destrutiva
+                },
+            ],
+            { cancelable: false } // Não permite fechar o modal tocando fora dele
+        );
+    };
+
 
     const loadMoreData = () => {
 
@@ -103,8 +158,6 @@ export default function PrivatePosts() {
 
     useEffect(() => {
 
-
-
         if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
 
             setPage(parseInt(params.page));
@@ -134,6 +187,14 @@ export default function PrivatePosts() {
         }
     }, []);
 
+    const viewPost = (id: number) => {
+        router.push({ pathname: 'posts/public/detail/[id]', params: { id: id } });
+        bottomSheetRef.current?.close();
+        setOpenBottomSheetRef(false);
+        flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+        router.setParams({ filter: '', page: '1' });
+    }
+
     // Função para abrir o BottomSheet
     const openBottomSheet = (post: Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'>) => {
         setPostOptions(post);
@@ -145,6 +206,13 @@ export default function PrivatePosts() {
         }
     };
 
+    if (loadingDelete) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size={50} color={DefaultTheme.colors.primary} />
+            </View>
+        );
+    }
     return (
         <View style={{ flex: 1, }}>
             {error && (
@@ -170,7 +238,7 @@ export default function PrivatePosts() {
                         aoClicarEmPost={() => {
                             router.push({
                                 pathname: '/posts/private/detail/[id]',
-                                params: { id: item.id.toString() || 0 }
+                                params: { id: item.id }
                             });
                         }}
                         aoClicarEmBottomSheet={openBottomSheet}
@@ -237,76 +305,27 @@ export default function PrivatePosts() {
                             />
                         </View>
 
-                        {postOptions.visivel && (
-                            <View style={styles.optionContainer}>
-                                <TouchableOpacity style={styles.option}>
-                                    <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
-                                    <Text style={styles.optionText}>Visualizar Post</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="edit" size={24} color={DefaultTheme.colors.primary} />
-                                <Text style={styles.optionText}>Editar Post</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="delete" size={24} color={DefaultTheme.colors.primary} />
-                                <Text style={styles.optionText}>Excluir Post</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                    </BottomSheetView>
-                </BottomSheet>
-            )}
-
-            {/*{postOptions && (
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
-                    onChange={handleSheetChanges}
-                    enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
-                    onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
-                    handleStyle={{
-                        backgroundColor: DefaultTheme.colors.background,
-                        borderTopStartRadius: 15,
-                        borderTopEndRadius: 15,
-                        borderBottomColor: DefaultTheme.colors.border,
-                        borderBottomWidth: 1
-                    }}
-                    backgroundStyle={{ backgroundColor: DefaultTheme.colors.background }} // Estilo de fundo
-                    handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }} // Estilo do indicador
-                >
-                    <BottomSheetView style={styles.contentContainer}>
-
-                        <View style={styles.imageContainer}>
-                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
-                            <Image
-                                source={{ uri: postOptions.foto?.url }}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
-                        </View>
-
                         <View style={styles.optionsContainer}>
 
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="open-in-new" size={30} color={'#FFF'} />
-                            </TouchableOpacity>
+                            {postOptions.visivel && (
+                                <TouchableOpacity style={styles.option} onPress={() => viewPost(postOptions.id)}>
+                                    <MaterialIcons name="open-in-new" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
 
-                            <TouchableOpacity style={styles.option}>
+                            <TouchableOpacity
+                                style={styles.option}
+                                onPress={() => router.push({
+                                    pathname: '/posts/private/detail/[id]',
+                                    params: { id: postOptions.id }
+                                })}>
                                 <MaterialIcons name="edit" size={30} color={'#FFF'} />
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.option}>
+                            <TouchableOpacity
+                                style={styles.option}
+                                onPress={() => confirmDeletePost(postOptions.id)} // Chama a função que exibirá o modal
+                            >
                                 <MaterialIcons name="delete" size={30} color={'#FFF'} />
                             </TouchableOpacity>
 
@@ -314,12 +333,11 @@ export default function PrivatePosts() {
 
                     </BottomSheetView>
                 </BottomSheet>
-            )}*/}
+            )}
 
         </View>
     );
 }
-/*
 
 const stylesTeste = (theme: IThemeMaximized) => {
     return StyleSheet.create({
@@ -328,6 +346,11 @@ const stylesTeste = (theme: IThemeMaximized) => {
             padding: 25,
             gap: 10,
             justifyContent: 'flex-start',
+            alignItems: 'center',
+        },
+        center: {
+            flex: 1,
+            justifyContent: 'center',
             alignItems: 'center',
         },
         imageContainer: {
@@ -373,7 +396,70 @@ const stylesTeste = (theme: IThemeMaximized) => {
         }
     });
 }
- */
+
+{/*{postOptions && (
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
+                    onChange={handleSheetChanges}
+                    enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
+                    onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
+                    handleStyle={{
+                        backgroundColor: DefaultTheme.colors.background,
+                        borderTopStartRadius: 15,
+                        borderTopEndRadius: 15,
+                        borderBottomColor: DefaultTheme.colors.border,
+                        borderBottomWidth: 1
+                    }}
+                    backgroundStyle={{ backgroundColor: DefaultTheme.colors.background }} // Estilo de fundo
+                    handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }} // Estilo do indicador
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+
+                        <View style={styles.imageContainer}>
+                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
+                            <Image
+                                source={{ uri: postOptions.foto?.url }}
+                                style={styles.image}
+                                resizeMode="cover"
+                            />
+                        </View>
+
+                        {postOptions.visivel && (
+                            <View style={styles.optionContainer}>
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => viewPost(postOptions.id)}
+                                >
+                                    <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
+                                    <Text style={styles.optionText}>Visualizar Post</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.optionContainer}>
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="edit" size={24} color={DefaultTheme.colors.primary} />
+                                <Text style={styles.optionText}>Editar Post</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.divider} />
+
+                        <View style={styles.optionContainer}>
+                            <TouchableOpacity style={styles.option}>
+                                <MaterialIcons name="delete" size={24} color={DefaultTheme.colors.primary} />
+                                <Text style={styles.optionText}>Excluir Post</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                    </BottomSheetView>
+                </BottomSheet>
+            )}*/}
+
+/*
 
 const stylesTeste = (theme: IThemeMaximized) => {
     return StyleSheet.create({
@@ -400,6 +486,8 @@ const stylesTeste = (theme: IThemeMaximized) => {
             height: 200,
             borderRadius: 8,
             marginBottom: 12,
+            borderColor: theme.colors.primary,
+            borderWidth: 2
         },
         optionContainer: {
             width: '100%',
@@ -433,6 +521,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         }
     });
 }
+ */
 
 
 
