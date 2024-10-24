@@ -33,6 +33,10 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             <Link href={'/posts/private'} style={{ cursor: 'pointer' }}>
               <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
             </Link>
+          ) : (props.route.name === 'users/new/index') ? (
+            <Link href={'/users'} style={{ cursor: 'pointer' }}>
+              <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
+            </Link>
           ) : (
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
@@ -45,7 +49,7 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
           </Link>
         )}
 
-        {(props.route.name === 'index' || props.route.name === 'posts/private/index') ? (
+        {(props.route.name === 'index' || props.route.name === 'posts/private/index' || props.route.name === 'users/index') ? (
           <View style={styles.searchContainer}>
             <TextInput
               placeholder={Environment.INPUT_DE_BUSCA}
@@ -80,6 +84,9 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             {props.route.name === 'posts/private/detail/[id]' && (
               <Text style={styles.sectionTitle}>Editar Post</Text>
             )}
+            {props.route.name === 'users/new/index' && (
+              <Text style={styles.sectionTitle}>Novo Usuário</Text>
+            )}
           </View>
         )
         }
@@ -90,14 +97,27 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
       </View>
 
-      {props.route.name === 'posts/private/index' && (
-        <View style={styles.headerContainerButton}>
-          <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/posts/private/new')}>
-            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
-            <Text style={styles.buttonTextUpload}>Novo Post</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {
+        props.route.name === 'posts/private/index' && (
+          <View style={styles.headerContainerButton}>
+            <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/posts/private/new')}>
+              <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
+              <Text style={styles.buttonTextUpload}>Novo Post</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }
+
+      {
+        props.route.name === 'users/index' && (
+          <View style={styles.headerContainerButton}>
+            <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/users/new')}>
+              <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
+              <Text style={styles.buttonTextUpload}>Novo Usuário</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      }
 
     </View >
   );

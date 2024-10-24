@@ -20,7 +20,7 @@ export interface IUsuario {
 }
 
 export interface IUsuarioComTotalCount {
-    data: IUsuario[];
+    data: IUsuarioCompleto[];
     totalCount: number;
 }
 

@@ -36,7 +36,7 @@ export default function HomeLayout() {
                             router.push('/posts/private')
                         }}
                         aoClicarEmGerenciarUsuarios={() => {
-                            router.push('/')
+                            router.push('/users')
                         }}
                         aoClicarEmAcessarConta={() => {
                             router.push('/login')
@@ -120,6 +120,32 @@ export default function HomeLayout() {
 
                 <Drawer.Screen
                     name="posts/private/new/index"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        ),
+
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="users/index"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        ),
+
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="users/new/index"
                     options={{
                         header: (props) => (
                             <Header

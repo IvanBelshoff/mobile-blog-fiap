@@ -150,16 +150,16 @@ export default function DrawerContent({ state, navigation, aoClicarEmBlog, aoCli
 
             {session && Environment.validaRegraPermissaoComponents(session?.regras || [], [Environment.REGRAS.REGRA_USUARIO]) && (
                 <TouchableOpacity
-                    style={temaPersonalizadoButton(isActive(['login']), styles.activeOption, styles.option)}
+                    style={temaPersonalizadoButton(isActive(['users/index', 'users/new/index']), styles.activeOption, styles.option)}
                     onPress={aoClicarEmGerenciarUsuarios}
                 >
                     <View style={styles.optionContent}>
                         <MaterialIcons
                             name="manage-accounts"
                             size={28}
-                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['login']), '#FFF', '#000')}
+                            color={temaPersonalizadoIcone(themeContext, themeSo, isActive(['users/index', 'users/new/index']), '#FFF', '#000')}
                         />
-                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['login']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
+                        <Text style={temaPersonalizadoComponent(themeContext, themeSo, isActive(['users/index', 'users/new/index']), styles.optionActiveTextWhite, styles.optionTextDark, styles.optionTextWhite)}>
                             Gerenciar Usuários
                         </Text>
                     </View>

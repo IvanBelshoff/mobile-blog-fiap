@@ -1,40 +1,30 @@
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AppThemeProvider } from '@/contexts/ThemeContext';
 import { LightTheme } from '@/themes/Light';
-import { Theme } from '@react-navigation/native';
 import 'react-native-reanimated';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaView, StatusBar, StyleSheet, useColorScheme } from 'react-native';
-import { useEffect, useState } from 'react';
-import { DarkTheme } from '@/themes/Dark';
+import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 
-  const [theme, setTheme] = useState<Theme>(LightTheme);
   const systemColorScheme = useColorScheme();
 
-  const getTheme = () => {
-    if (systemColorScheme === "light") {
-      return LightTheme;
-    } else {
-      return DarkTheme;
-    }
-  };
-
-  StatusBar.setTranslucent(true);
-  StatusBar.setBackgroundColor(theme.colors.primary);
-  StatusBar.setBarStyle('light-content');
+  const setStatusBarColor = () => {
+    StatusBar.setTranslucent(true);
+    StatusBar.setBackgroundColor(LightTheme.colors.primary);
+    StatusBar.setBarStyle('light-content', true);
+  }
 
   useEffect(() => {
-    setTheme(getTheme());
+    setStatusBarColor();
   }, [systemColorScheme]);
 
   return (
     <SafeAreaView style={styles.container}>
-
       <AppThemeProvider>
         <AuthProvider>
           <Stack screenOptions={{ headerShown: false }}>

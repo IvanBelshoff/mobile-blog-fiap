@@ -1,36 +1,41 @@
-import CardPostPrivate from "@/components/Cards/CardPostPrivate";
+import CardUser from "@/components/Cards/CardUser";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { Environment } from "@/environment";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
-import { IPosts, PostsService } from "@/services/Posts/postsService";
+import { IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
+import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet, NativeSyntheticEvent, NativeScrollEvent, Image, Alert } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Alert, NativeSyntheticEvent, NativeScrollEvent, StyleSheet } from "react-native";
 
-export default function PrivatePosts() {
 
-    const [posts, setPosts] = useState<IPosts[]>([]);
+export default function Users() {
+
+    const [usuarios, setUsuarios] = useState<IUsuarioCompleto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const { DefaultTheme } = useAppThemeContext()
-    const ITEM_HEIGHT = 150; // Defina um valor que corresponda ao tamanho do CardPost
+    const ITEM_HEIGHT = 300; // Defina um valor que corresponda ao tamanho do CardPost
     const flatListRef = useRef<FlatList>(null); // Criando a referência ao FlatList
     const styles = stylesTeste(DefaultTheme);
     const params = useLocalSearchParams<{ filter: string, page: string }>();
     const [page, setPage] = useState<number>(parseInt(params?.page) || 1);
     const [viewArrowUp, setViewArrowUp] = useState<boolean>(false);
-    const [postOptions, setPostOptions] = useState<Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'> | null>(null);
+    const [userOptions, setUserOptions] = useState<Pick<IUsuarioCompleto, 'id' | 'foto' | 'nome' | 'sobrenome' | 'email'> | null>(null);
     const [openbottomSheetRef, setOpenBottomSheetRef] = useState<boolean>(false);
 
-    const fetchData = async (page: string, filter: string): Promise<IPosts[] | AxiosError> => {
+    const { session } = useAuth();
+
+    const fetchData = async (page: string, filter: string): Promise<IUsuarioCompleto[] | AxiosError> => {
 
         setLoading(true);
 
-        const result = await PostsService.getAll(page, filter, Environment.LIMITE_DE_POSTS); // Página 1, sem filtro, limite de 10 posts
+        const result = await UsuariosService.getAll(page, filter, Environment.LIMITE_DE_USUARIOS); // Página 1, sem filtro, limite de 10 posts
 
         if (result instanceof AxiosError) {
             setLoading(false);
@@ -43,27 +48,27 @@ export default function PrivatePosts() {
 
     };
 
-    const handleDeletePost = async (id: number) => {
+    const handleDeleteUser = async (id: number) => {
 
         try {
             setLoadingDelete(true);
 
-            const response = await PostsService.deleteById(id);
+            const response = await UsuariosService.deleteById(id);
 
             if (response instanceof AxiosError) {
-                setLoadingDelete(false);
+                setLoadingDelete(false)
                 console.log(response.message);
 
             } else {
-                Alert.alert("Sucesso", "Post excluido com sucesso!");
-                setPostOptions(null);
+                Alert.alert("Sucesso", "Usuário excluido com sucesso!");
+                setUserOptions(null);
                 flatListRef.current?.scrollToOffset({ offset: 0 });
                 fetchData(params.page || '1', params.filter).then((data) => {
                     if (data instanceof AxiosError) {
                         setError(data.message);
 
                     } else {
-                        setPosts(data);
+                        setUsuarios(data);
                     }
                 }).finally(() => {
                     bottomSheetRef.current?.close();
@@ -71,15 +76,15 @@ export default function PrivatePosts() {
                 });
             }
         } catch (error) {
-            Alert.alert("Erro", "Falha ao enviar o post.");
+            Alert.alert("Erro", "Falha ao enviar o Usuário.");
             console.error(error);
         }
     };
 
-    const confirmDeletePost = (id: number) => {
+    const confirmDeleteUser = (id: number) => {
         Alert.alert(
             "Confirmação de Exclusão",
-            "Tem certeza de que deseja excluir este post?",
+            "Tem certeza de que deseja excluir este usuário?",
             [
                 {
                     text: "Cancelar",
@@ -88,7 +93,7 @@ export default function PrivatePosts() {
                 },
                 {
                     text: "Sim",
-                    onPress: () => handleDeletePost(id), // Se o usuário confirmar, executa a exclusão
+                    onPress: () => handleDeleteUser(id), // Se o usuário confirmar, executa a exclusão
                     style: "destructive", // Estilo de botão de ação destrutiva
                 },
             ],
@@ -107,10 +112,10 @@ export default function PrivatePosts() {
 
             } else {
 
-                setPosts((oldPosts) => {
-                    if (oldPosts.length) {
-                        const novosPosts = data.filter((post) => !oldPosts.some((oldPost) => oldPost.id === post.id));
-                        const postsAtualizados = [...oldPosts, ...novosPosts];
+                setUsuarios((oldUsers) => {
+                    if (oldUsers.length) {
+                        const novosPosts = data.filter((user) => !oldUsers.some((oldPost) => oldPost.id === user.id));
+                        const postsAtualizados = [...oldUsers, ...novosPosts];
                         return postsAtualizados;
                     } else {
                         return data;
@@ -169,7 +174,7 @@ export default function PrivatePosts() {
                 setError(data.message);
 
             } else {
-                setPosts(data);
+                setUsuarios(data);
             }
         });
 
@@ -186,7 +191,7 @@ export default function PrivatePosts() {
         }
     }, []);
 
-    const viewPost = (id: number) => {
+    const viewUser = (id: number) => {
         router.push({ pathname: '/posts/public/detail/[id]', params: { id: id } });
         bottomSheetRef.current?.close();
         setOpenBottomSheetRef(false);
@@ -195,8 +200,8 @@ export default function PrivatePosts() {
     }
 
     // Função para abrir o BottomSheet
-    const openBottomSheet = (post: Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'>) => {
-        setPostOptions(post);
+    const openBottomSheet = (usuario: Pick<IUsuarioCompleto, 'id' | 'foto' | 'nome' | 'sobrenome' | 'email'>) => {
+        setUserOptions(usuario);
         if (openbottomSheetRef) {
             bottomSheetRef.current?.close(); // Fecha a folha completamente
 
@@ -212,8 +217,10 @@ export default function PrivatePosts() {
             </View>
         );
     }
+
     return (
         <View style={{ flex: 1, }}>
+
             {error && (
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ color: 'red' }}>{error}</Text>
@@ -222,7 +229,7 @@ export default function PrivatePosts() {
 
             <FlatList
                 ref={flatListRef}
-                data={posts}
+                data={usuarios}
                 style={{ marginLeft: 10, marginRight: 10 }}
                 initialNumToRender={10}
                 maxToRenderPerBatch={5}
@@ -231,16 +238,12 @@ export default function PrivatePosts() {
                 )}
                 onScroll={onScroll}
                 renderItem={({ item, index }) =>
-                    <CardPostPrivate
-                        post={item}
+                    <CardUser
                         index={index}
-                        aoClicarEmPost={() => {
-                            router.push({
-                                pathname: '/posts/private/detail/[id]',
-                                params: { id: item.id }
-                            });
-                        }}
                         aoClicarEmBottomSheet={openBottomSheet}
+                        aoClicarEmUser={() => openBottomSheet(item)}
+                        user={item}
+                        key={item.id}
                     />
                 }
                 keyExtractor={(item) => item.id.toString() + item.titulo}
@@ -276,10 +279,10 @@ export default function PrivatePosts() {
                 </View>
             )}
 
-            {postOptions && (
+            {userOptions && (
                 <BottomSheet
                     ref={bottomSheetRef}
-                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
+                    snapPoints={['60%']} // Defina os pontos de snap em porcentagens ou valores
                     onChange={handleSheetChanges}
                     enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
                     onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
@@ -295,38 +298,51 @@ export default function PrivatePosts() {
                 >
                     <BottomSheetView style={styles.contentContainer}>
 
-                        <View style={styles.imageContainer}>
-                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
-                            <Image
-                                source={{ uri: postOptions.foto?.url }}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
+                        <View style={styles.containerView}>
+                            <View style={styles.imageContainer}  >
+                                <Image
+                                    source={{ uri: userOptions.foto.url }}
+                                    style={styles.image}
+                                    resizeMode="cover"
+                                />
+                            </View>
+
+                            <View style={styles.userContainer} >
+                                {/* Título centralizado */}
+                                <Text style={styles.text}>{userOptions.nome} {userOptions.sobrenome}</Text>
+
+                            </View>
                         </View>
 
                         <View style={styles.optionsContainer}>
-
-                            {postOptions.visivel && (
-                                <TouchableOpacity style={styles.option} onPress={() => viewPost(postOptions.id)}>
-                                    <MaterialIcons name="open-in-new" size={30} color={'#FFF'} />
-                                </TouchableOpacity>
-                            )}
-
                             <TouchableOpacity
                                 style={styles.option}
                                 onPress={() => router.push({
-                                    pathname: '/posts/private/detail/[id]',
-                                    params: { id: postOptions.id }
-                                })}>
+                                    pathname: '/users/detail/[id]',
+                                    params: { id: userOptions.id }
+                                })}
+                            >
                                 <MaterialIcons name="edit" size={30} color={'#FFF'} />
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={styles.option}
-                                onPress={() => confirmDeletePost(postOptions.id)} // Chama a função que exibirá o modal
+                                onPress={() => router.push({
+                                    pathname: '/users/rules/[id]',
+                                    params: { id: userOptions.id }
+                                })}
                             >
-                                <MaterialIcons name="delete" size={30} color={'#FFF'} />
+                                <MaterialIcons name="rule" size={30} color={'#FFF'} />
                             </TouchableOpacity>
+
+                            {(session && Number(session.userId) != userOptions.id) && (
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => confirmDeleteUser(userOptions.id)}
+                                >
+                                    <MaterialIcons name="delete" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
 
                         </View>
 
@@ -342,35 +358,47 @@ const stylesTeste = (theme: IThemeMaximized) => {
     return StyleSheet.create({
         contentContainer: {
             flex: 1,
-            padding: 25,
-            gap: 10,
             justifyContent: 'flex-start',
             alignItems: 'center',
+            flexDirection: 'column',
+            paddingBottom: 27
+        },
+        containerView: {
+            flexDirection: 'column',
+            flex: 1,
+            gap: 15,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        userContainer: {
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        imageContainer: {
+            width: 150,
+            height: 150,
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        text: {
+            color: theme.colors.text,
+            fontWeight: 'bold',
+            flexWrap: 'wrap',
+            fontSize: 26
         },
         center: {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'center',
         },
-        imageContainer: {
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 25
-        },
-        titlePost: {
-            color: theme.colors.text,
-            fontSize: 20,
-            fontWeight: 'bold'
-        },
         image: {
             width: '100%',
-            height: 200,
+            height: '100%',
             borderRadius: 8,
-            marginBottom: 12,
+            borderColor: theme.colors.primary,
+            borderWidth: 2
         },
         optionsContainer: {
-            flex: 1,
             flexDirection: 'row',
             justifyContent: 'center',
             gap: 50,
@@ -395,132 +423,3 @@ const stylesTeste = (theme: IThemeMaximized) => {
         }
     });
 }
-
-{/*{postOptions && (
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    snapPoints={['65%']} // Defina os pontos de snap em porcentagens ou valores
-                    onChange={handleSheetChanges}
-                    enablePanDownToClose={true} // Permite fechar ao deslizar para baixo
-                    onClose={() => setOpenBottomSheetRef(false)} // Garante que o estado seja atualizado ao fechar
-                    handleStyle={{
-                        backgroundColor: DefaultTheme.colors.background,
-                        borderTopStartRadius: 15,
-                        borderTopEndRadius: 15,
-                        borderBottomColor: DefaultTheme.colors.border,
-                        borderBottomWidth: 1
-                    }}
-                    backgroundStyle={{ backgroundColor: DefaultTheme.colors.background }} // Estilo de fundo
-                    handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }} // Estilo do indicador
-                >
-                    <BottomSheetView style={styles.contentContainer}>
-
-                        <View style={styles.imageContainer}>
-                            <Text style={styles.titlePost}>{postOptions.titulo}</Text>
-                            <Image
-                                source={{ uri: postOptions.foto?.url }}
-                                style={styles.image}
-                                resizeMode="cover"
-                            />
-                        </View>
-
-                        {postOptions.visivel && (
-                            <View style={styles.optionContainer}>
-                                <TouchableOpacity
-                                    style={styles.option}
-                                    onPress={() => viewPost(postOptions.id)}
-                                >
-                                    <MaterialIcons name="visibility" size={24} color={DefaultTheme.colors.primary} />
-                                    <Text style={styles.optionText}>Visualizar Post</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="edit" size={24} color={DefaultTheme.colors.primary} />
-                                <Text style={styles.optionText}>Editar Post</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.optionContainer}>
-                            <TouchableOpacity style={styles.option}>
-                                <MaterialIcons name="delete" size={24} color={DefaultTheme.colors.primary} />
-                                <Text style={styles.optionText}>Excluir Post</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                    </BottomSheetView>
-                </BottomSheet>
-            )}*/}
-
-/*
-
-const stylesTeste = (theme: IThemeMaximized) => {
-    return StyleSheet.create({
-        contentContainer: {
-            flex: 1,
-            gap: 15,
-            padding: 25,
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-        },
-        imageContainer: {
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 25
-        },
-        titlePost: {
-            color: theme.colors.text,
-            fontSize: 20,
-            fontWeight: 'bold'
-        },
-        image: {
-            width: '100%',
-            height: 200,
-            borderRadius: 8,
-            marginBottom: 12,
-            borderColor: theme.colors.primary,
-            borderWidth: 2
-        },
-        optionContainer: {
-            width: '100%',
-            justifyContent: 'center',
-            alignItems: 'center'
-        },
-        option: {
-            flexDirection: 'row', // Coloca o ícone e o texto lado a lado
-            alignItems: 'center'
-        },
-        optionText: {
-            fontSize: 18, // Aumenta o tamanho da fonte
-            color: theme.colors.text, // Cor do texto
-            marginLeft: 10, // Espaço entre o ícone e o texto
-            fontWeight: 'light'
-        },
-        divider: {
-            width: '100%',
-            justifyContent: 'center',
-            backgroundColor: theme.colors.border,
-            height: 1
-        },
-        floatingButton: {
-            position: 'absolute',
-            bottom: 20, // distância do fundo da tela
-            right: 20,   // distância do lado esquerdo da tela
-            backgroundColor: theme.colors.primary, // cor do botão (você pode customizar)
-            borderRadius: 50,
-            padding: 15,
-            elevation: 5, // elevação para dar um efeito de sombra
-        }
-    });
-}
- */
-
-
-

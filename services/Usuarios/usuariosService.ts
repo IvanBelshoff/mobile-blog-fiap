@@ -1,5 +1,5 @@
 import { AxiosError, isAxiosError } from 'axios';
-import { IDataToken, IUsuarioCompleto } from './interfaces/interfaces';
+import { IDataToken, IUsuarioCompleto, IUsuarioComTotalCount } from './interfaces/interfaces';
 import { IResponseErrosGeneric } from '../Posts/postsService';
 import { Api } from '../api/api';
 
@@ -146,7 +146,70 @@ const deleteFotoById = async (id: number): Promise<void | AxiosError> => {
     }
 };
 
+const getAll = async (page?: string, filter?: string, limit?: string): Promise<IUsuarioComTotalCount | AxiosError> => {
+    try {
+
+        const data = await Api().get('usuarios', {
+            params: {
+                page: Number(page),
+                filter: filter,
+                limit: limit,
+            }
+        });
+
+        if (data.status == 200) {
+            return {
+                data: data.data,
+                totalCount: Number(data.headers['x-total-count'] || limit),
+            };
+        }
+
+        return new AxiosError('Erro ao consultar o registros.', undefined, data.config);
+
+    } catch (error) {
+
+        const errors = (error as IResponseErrosGeneric).response;
+
+        if (isAxiosError(error)) {
+            return error;
+        }
+
+        return new AxiosError(
+            errors?.data?.errors?.default || 'Erro ao consultar o registros.',
+            errors?.status || '500');
+
+    }
+};
+
+const deleteById = async (id: number): Promise<void | AxiosError> => {
+    try {
+        const data = await Api().delete(`/usuarios/${id}`);
+
+        if (data.status == 204) {
+            return;
+        }
+
+        return new AxiosError('Erro ao consultar o registros.', undefined, data.config);
+
+    } catch (error) {
+
+        const errors = (error as IResponseErrosGeneric).response;
+
+        if (isAxiosError(error)) {
+            return error;
+        }
+
+        return new AxiosError(
+            errors?.data?.errors?.default || 'Erro ao consultar o registros.',
+            errors?.status || '500');
+
+    }
+};
+
+
 export const UsuariosService = {
+    getAll,
+    deleteById,
     login,
     getById,
     updatePasswordById,
