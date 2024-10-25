@@ -11,7 +11,7 @@ import { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Alert, NativeSyntheticEvent, NativeScrollEvent, StyleSheet } from "react-native";
-
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Users() {
 
@@ -160,25 +160,25 @@ export default function Users() {
 
     }
 
-    useEffect(() => {
+    useFocusEffect(
+        useCallback(() => {
+            if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
 
-        if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
+                setPage(parseInt(params.page));
+                flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
 
-            setPage(parseInt(params.page));
-            flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
-
-        }
-
-        fetchData(params.page || '1', params.filter).then((data) => {
-            if (data instanceof AxiosError) {
-                setError(data.message);
-
-            } else {
-                setUsuarios(data);
             }
-        });
 
-    }, [params.filter || params.page]);
+            fetchData(params.page || '1', params.filter).then((data) => {
+                if (data instanceof AxiosError) {
+                    setError(data.message);
+
+                } else {
+                    setUsuarios(data);
+                }
+            });
+        }, [params.filter || params.page])
+    );
 
     const bottomSheetRef = useRef<BottomSheet>(null);
 

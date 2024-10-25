@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { useLocalSearchParams } from 'expo-router';
 import { IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Environment } from "@/environment";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface IActionDetalhesDeUsuarios {
     response?: {
@@ -290,13 +291,14 @@ export default function Profile() {
 
         }
     };
-    // Função para buscar dados do usuário pelo id
-    useEffect(() => {
 
-        fetchUsuario();
+    useFocusEffect(
+        useCallback(() => {
 
-    }, [id]);
-
+            fetchUsuario();
+            
+        }, [id])
+    );
 
     if (loading) {
         return (

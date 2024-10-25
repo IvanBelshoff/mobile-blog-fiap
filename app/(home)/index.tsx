@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Text, View, ActivityIndicator, FlatList } from 'react-native';
 import { AxiosError } from 'axios';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -7,6 +7,7 @@ import { IPosts, PostsService } from '@/services/Posts/postsService';
 import { Environment } from '@/environment';
 import { useAppThemeContext } from '@/contexts/ThemeContext';
 import CardPostPublic from '@/components/Cards/CardPostPublic';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Index() {
 
@@ -70,25 +71,25 @@ export default function Index() {
 
   }, [page]);
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
+      if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
 
-    if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
+        setPage(parseInt(params.page));
+        flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
 
-      setPage(parseInt(params.page));
-      flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
-
-    }
-
-    fetchData(params.page || '1', params.filter).then((data) => {
-      if (data instanceof AxiosError) {
-        setError(data.message);
-
-      } else {
-        setPosts(data);
       }
-    });
 
-  }, [params.filter || params.page]);
+      fetchData(params.page || '1', params.filter).then((data) => {
+        if (data instanceof AxiosError) {
+          setError(data.message);
+
+        } else {
+          setPosts(data);
+        }
+      });
+    }, [params.filter || params.page])
+  );
 
   return (
     <View style={{ flex: 1, }}>

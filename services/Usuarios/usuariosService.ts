@@ -149,7 +149,7 @@ const deleteFotoById = async (id: number): Promise<void | AxiosError> => {
 const getAll = async (page?: string, filter?: string, limit?: string): Promise<IUsuarioComTotalCount | AxiosError> => {
     try {
 
-        const data = await Api().get('usuarios', {
+        const data = await Api().get('/usuarios/mobile', {
             params: {
                 page: Number(page),
                 filter: filter,
@@ -206,8 +206,71 @@ const deleteById = async (id: number): Promise<void | AxiosError> => {
     }
 };
 
+const create = async (
+    nome?: string,
+    sobrenome?: string,
+    email?: string,
+    bloqueado?: string,
+    senha?: string,
+    foto?: { uri: string; name: string; type: string },
+): Promise<number | AxiosError> => {
+    try {
+
+        const formData = new FormData();
+
+        nome && (
+            formData.append('nome', nome)
+        );
+
+        sobrenome && (
+            formData.append('sobrenome', sobrenome)
+        );
+
+        email && (
+            formData.append('email', email)
+        )
+
+        bloqueado && (
+            formData.append('bloqueado', bloqueado)
+        )
+
+        senha && (
+            formData.append('senha', senha)
+        )
+
+        foto && (
+            formData.append('foto', foto as unknown as File)
+        );
+
+        const data = await Api().post('/usuarios', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (data.status == 201) {
+            return data.data;
+        }
+
+        return new AxiosError('Erro ao consultar o registros.', undefined, data.config);
+
+    } catch (error) {
+
+        const errors = (error as IResponseErrosGeneric).response;
+
+        if (isAxiosError(error)) {
+            return error;
+        }
+
+        return new AxiosError(
+            errors?.data?.errors?.default || 'Erro ao consultar o registros.',
+            errors?.status || '500');
+
+    }
+};
 
 export const UsuariosService = {
+    create,
     getAll,
     deleteById,
     login,

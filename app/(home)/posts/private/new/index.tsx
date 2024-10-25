@@ -1,7 +1,7 @@
 import { PostsService } from "@/services/Posts/postsService";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { View, Text, Alert, StyleSheet, TextInput, Button, ActivityIndicator, Image, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
+import { View, Text, Alert, StyleSheet, TextInput, ActivityIndicator, Image, KeyboardAvoidingView, Platform, TouchableOpacity } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import { Environment } from "@/environment";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -237,29 +237,29 @@ export default function NewPostPrivate() {
 
 
                         <View style={styles.buttonContainer}>
-                            <>
-                                {PostForm?.foto ? (
-                                    <TouchableOpacity style={styles.buttonDelete} onPress={handleCancelSubmit}>
-                                        <MaterialIcons name="cancel" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
-                                        <Text style={styles.buttonTextDelete}>Cancelar Alteração</Text>
-                                    </TouchableOpacity>
-                                ) : (
 
-                                    <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
-                                        <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
-                                        <Text style={styles.buttonTextUpload}>Carregar Capa</Text>
-                                    </TouchableOpacity>
+                            {PostForm?.foto ? (
+                                <TouchableOpacity style={styles.buttonDelete} onPress={handleCancelSubmit}>
+                                    <MaterialIcons name="cancel" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
+                                    <Text style={styles.buttonTextDelete}>Cancelar Alteração</Text>
+                                </TouchableOpacity>
+                            ) : (
+
+                                <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
+                                    <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
+                                    <Text style={styles.buttonTextUpload}>Carregar Capa</Text>
+                                </TouchableOpacity>
 
 
-                                )}
-                                {(PostForm?.titulo || PostForm?.descricao) && (
-                                    <TouchableOpacity style={styles.buttonDelete} onPress={resetForm}>
-                                        <MaterialIcons name="clear-all" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
-                                        <Text style={styles.buttonTextDelete}>Limpar</Text>
-                                    </TouchableOpacity>
-                                )}
+                            )}
+                            
+                            {(PostForm?.titulo || PostForm?.descricao) && (
+                                <TouchableOpacity style={styles.buttonDelete} onPress={resetForm}>
+                                    <MaterialIcons name="clear-all" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
+                                    <Text style={styles.buttonTextDelete}>Limpar</Text>
+                                </TouchableOpacity>
+                            )}
 
-                            </>
                         </View>
 
                     </View>
