@@ -65,17 +65,19 @@ export default function NewPostPrivate() {
     const [error, setError] = useState<INovoPostAction | undefined>(undefined);
     const [statePhoto, setStatePhoto] = useState<'default' | 'preview'>('default');
     const [limitedFileSize, setLimitedFileSize] = useState<boolean>(true);
-
+    
     const { DefaultTheme } = useAppThemeContext();
-
+    
     const styles = stylesTeste(DefaultTheme);
-
+    
     const handleSubmitPost = async () => {
-
+        
         try {
-            setLoading(true);
-
-            const response = await PostsService.create(PostForm?.titulo, PostForm?.descricao, PostForm?.visivel == true ? 'true' : 'false', PostForm?.foto);
+            setLoading(true);            
+            const responseFoto = await fetch(PostForm?.foto?.uri || '');
+            const blob = await responseFoto.blob();
+            const foto = blob as File
+            const response = await PostsService.create(PostForm?.titulo, PostForm?.descricao, PostForm?.visivel == true ? 'true' : 'false',  foto);
 
             if (response instanceof AxiosError) {
                 setLoading(false);
@@ -150,14 +152,14 @@ export default function NewPostPrivate() {
             quality: 0.1, // Qualidade da imagem
         });
 
-        if (!result.canceled && result.assets[0].fileSize) {
+        if (!(result.canceled)) {
 
-            console.log('Resultado' + result.assets[0].fileSize);
-            const fileSize = checkFileSizeBoolean(result.assets[0].fileSize, Environment.FILE_SIZE_LIMIT); // Verifica o tamanho do arquivo
+            // console.log('Resultado' + result.assets[0].fileSize);
+            // const fileSize = checkFileSizeBoolean(result.assets[0].fileSize, Environment.FILE_SIZE_LIMIT); // Verifica o tamanho do arquivo
 
-            if (fileSize) {
-                setLimitedFileSize(false);
-            }
+            // if (fileSize) {
+            //     setLimitedFileSize(false);
+            // }
 
             // Estrutura da imagem conforme o solicitado
             const image = {
@@ -165,8 +167,6 @@ export default function NewPostPrivate() {
                 name: result.assets[0].uri.split('/').pop() || `image-${Date.now()}.jpg`, // Nome da imagem
                 type: 'image/jpeg' // Tipo de arquivo, pode ser alterado dependendo do tipo real da imagem
             };
-
-            console.log('Imagem' + image.uri);
             // Armazenar a imagem no estado
             setPostForm({ ...PostForm, foto: image });
             setStatePhoto('preview');
@@ -292,7 +292,7 @@ export default function NewPostPrivate() {
                                 ]}
                                 value={PostForm?.visivel == true ? 'true' : 'false'}
 
-                                placeholder={{ label: "Selecione uma opção", value: 'true' }}
+                                placeholder={{ label: "Selecione uma opção" }}
                                 darkTheme={DefaultTheme.dark}
                                 style={{
                                     viewContainer: {
