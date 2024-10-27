@@ -273,7 +273,7 @@ const create = async (
     titulo?: string,
     conteudo?: string,
     visivel?: string,
-    foto?: { uri: string; name: string; type: string },
+    foto?: File | null,
 ): Promise<number | AxiosError> => {
     try {
         const formData = new FormData();
