@@ -118,25 +118,29 @@ const stylesTeste = (theme: Theme) => {
             marginTop: 16,
         },
         title: {
-            fontSize: 32,
+            fontSize: 20,
             fontWeight: 'bold',
             color: theme.colors.text,
             textAlign: 'center',
             marginBottom: 20,
             marginTop: 20,
+            paddingHorizontal: 12,
         },
         content: {
-            fontSize: 18,
+            fontSize: 16,
             lineHeight: 26, // Altura da linha para facilitar a leitura
             color: theme.dark ? '#ECECEC': theme.colors.text,
             textAlign: 'justify',
             marginBottom: 16, // Este deve funcionar agora
             marginTop: 16,
+            paddingHorizontal: 20,
+
         },
         info: {
             fontSize: 14,
             color: theme.dark ? '#FFFFFFB3' : '#555',
             marginBottom: 8,
+            paddingHorizontal: 20,
         },
         error: {
             fontSize: 18,

@@ -69,10 +69,12 @@ const stylesTeste = (theme: Theme) => {
         author: {
             fontSize: 14,
             color: theme.dark ? '#FFFFFFB3' : '#555',
+            paddingHorizontal: 12,
         },
         date: {
             fontSize: 14,
             color: theme.dark ? '#FFFFFFB3' : '#555',
+            paddingHorizontal: 12,
         },
     });
 }
