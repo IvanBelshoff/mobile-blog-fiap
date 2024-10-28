@@ -192,7 +192,7 @@ export default function Users() {
     }, []);
 
     const viewUser = (id: number) => {
-        router.push({ pathname: '/posts/public/detail/[id]', params: { id: id } });
+        router.push({ pathname: '/users/detail/[id]', params: { id: id } });
         bottomSheetRef.current?.close();
         setOpenBottomSheetRef(false);
         flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -237,15 +237,15 @@ export default function Users() {
                     { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
                 )}
                 onScroll={onScroll}
-                renderItem={({ item, index }) =>
+                renderItem={({ item, index }) => (
                     <CardUser
                         index={index}
                         aoClicarEmBottomSheet={openBottomSheet}
-                        aoClicarEmUser={() => openBottomSheet(item)}
+                        aoClicarEmUser={() => viewUser(item.id)}
                         user={item}
                         key={item.id}
                     />
-                }
+                )}
                 keyExtractor={(item) => item.id.toString() + item.titulo}
                 ListEmptyComponent={
                     <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 30 }}>

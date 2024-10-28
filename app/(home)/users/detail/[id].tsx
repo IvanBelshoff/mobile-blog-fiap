@@ -1,52 +1,58 @@
 import { useAppThemeContext } from "@/contexts/ThemeContext";
-import { PostsService } from "@/services/Posts/postsService";
+import { IThemeMaximized } from "@/globalInterfaces/interfaces";
+import { UsuariosService } from "@/services/Usuarios/usuariosService";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { AxiosError } from "axios";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { View, Text, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Image, TouchableOpacity, TextInput, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, KeyboardAvoidingView, Image, TouchableOpacity, TextInput, Platform, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from 'expo-image-picker';
 import { Environment } from "@/environment";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "@/contexts/AuthContext";
 import RNPickerSelect from 'react-native-picker-select';
-import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 
-interface IPostForm {
-    titulo?: string;
-    descricao?: string;
+interface IUserForm {
+    nome?: string;
+    sobrenome?: string;
+    email?: string;
+    senha?: string;
     foto?: {
         uri: string;
         name: string;
         type: string
     },
-    visivel?: boolean;
+    bloqueado?: boolean;
 }
 
-interface IActionNovoPost {
+export interface IActionNovoUsuario {
     response?: {
         data: {
             errors?: {
                 default?: string
                 body?: {
-                    titulo: string
-                    conteudo: string
-                    visivel: string
+                    nome: string,
+                    sobrenome: string,
+                    email: string,
+                    senha: string
                 }
             },
             success?: {
                 message?: string
             }
+
         }
     }
 }
 
-interface INovoPostAction {
+export interface INovoUsuarioAction {
     errors?: {
         default?: string
         body?: {
-            titulo?: string
-            conteudo?: string
-            visivel?: string
+            nome?: string,
+            sobrenome?: string,
+            email?: string,
+            senha?: string
         }
     },
     success?: {
@@ -54,52 +60,56 @@ interface INovoPostAction {
     }
 }
 
-
-export default function DetailPostPrivate() {
+export default function DetailUser() {
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [PostForm, setPostForm] = useState<IPostForm>({
-        titulo: undefined,
-        descricao: undefined,
+    const [showPassword, setShowPassword] = useState(false);
+    const [UserForm, setUserForm] = useState<IUserForm>({
+        nome: undefined,
+        sobrenome: undefined,
+        email: undefined,
         foto: undefined,
-        visivel: undefined
+        bloqueado: undefined
     });
-    const [error, setError] = useState<INovoPostAction | undefined>(undefined);
+    const [error, setError] = useState<INovoUsuarioAction | undefined>(undefined);
     const [statePhoto, setStatePhoto] = useState<'default' | 'preview'>('default');
     const [limitedFileSize, setLimitedFileSize] = useState<boolean>(true);
     const [selectedImage, setSelectedImage] = useState<{ uri: string; name: string; type: string } | null>(null);
 
     const { id } = useLocalSearchParams();
+    const { session } = useAuth();
 
     const { DefaultTheme } = useAppThemeContext();
 
     const styles = stylesTeste(DefaultTheme);
 
-    const fetchPost = async () => {
+    const fetchUser = async () => {
 
         try {
-            const data = await PostsService.getById(Number(id));
+            const data = await UsuariosService.getById(Number(id));
 
             if (data instanceof AxiosError) {
+                setLoading(false);
+                const errors = (data as IActionNovoUsuario).response?.data.errors;
+
                 setError({
                     errors: {
-                        default: data.message,
+                        default: errors?.default,
                         body: {
-                            conteudo: undefined,
-                            titulo: undefined,
-                            visivel: undefined
+                            nome: errors?.body?.nome,
+                            sobrenome: errors?.body?.sobrenome,
+                            email: errors?.body?.email,
+                            senha: errors?.body?.senha
                         }
                     }
                 });
 
-                setLoading(false);
-
                 return;
             } else {
-                setPostForm({
-                    titulo: data.titulo,
-                    descricao: data.conteudo,
-                    visivel: data.visivel,
+                setUserForm({
+                    nome: data.nome,
+                    sobrenome: data.sobrenome,
+                    email: data.email,
                     foto: {
                         uri: data.foto?.url,
                         name: data.foto.nome,
@@ -113,9 +123,10 @@ export default function DetailPostPrivate() {
                 errors: {
                     default: 'Erro ao carregar informações do post',
                     body: {
-                        conteudo: undefined,
-                        titulo: undefined,
-                        visivel: undefined
+                        nome: undefined,
+                        sobrenome: undefined,
+                        email: undefined,
+                        senha: undefined
                     }
                 }
             });
@@ -124,31 +135,32 @@ export default function DetailPostPrivate() {
         }
     };
 
-    const handleSubmitPost = async () => {
+    const handleSubmitUser = async () => {
 
         try {
             setLoading(true);
 
-            const response = await PostsService.updateById(Number(id), PostForm?.titulo, PostForm?.descricao, PostForm?.visivel == true ? 'true' : 'false', selectedImage || undefined);
+            const response = await UsuariosService.updateById(Number(id), UserForm?.nome, UserForm?.sobrenome, UserForm?.email, selectedImage || undefined, UserForm?.bloqueado == true ? 'true' : 'false', UserForm?.senha);
 
             if (response instanceof AxiosError) {
                 setLoading(false);
-                const errors = (response as IActionNovoPost).response?.data.errors;
+                const errors = (response as IActionNovoUsuario).response?.data.errors;
                 setError({
                     errors: {
                         default: errors?.default,
                         body: {
-                            conteudo: errors?.body?.conteudo,
-                            titulo: errors?.body?.titulo,
-                            visivel: errors?.body?.visivel
+                            nome: errors?.body?.nome,
+                            sobrenome: errors?.body?.sobrenome,
+                            email: errors?.body?.email,
+                            senha: errors?.body?.senha
                         }
                     }
                 });
 
             } else {
-                Alert.alert("Sucesso", "Post criado com sucesso!");
+                Alert.alert("Sucesso", "Usuário criado com sucesso!");
 
-                await fetchPost().then(() => {
+                await fetchUser().then(() => {
                     setSelectedImage(null);
                     setStatePhoto('default');
                 }).finally(() => {
@@ -168,10 +180,6 @@ export default function DetailPostPrivate() {
         setLimitedFileSize(true);
     }
 
-    const resetForm = () => {
-        setPostForm({ ...PostForm, descricao: undefined, titulo: undefined });
-    }
-
     const checkFileSizeBoolean = (fileSizeInBytes: number, maxSizeInMB: number): boolean => {
         // Convertendo o limite de MB para bytes
         const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
@@ -189,10 +197,10 @@ export default function DetailPostPrivate() {
         try {
             setLoading(true);
 
-            const response = await PostsService.deleteCapaById(Number(id));
+            const response = await UsuariosService.deleteFotoById(Number(id));
 
             if (response instanceof AxiosError) {
-                const errors = (response as IActionNovoPost).response?.data.errors;
+                const errors = (response as IActionNovoUsuario).response?.data.errors;
 
                 setError({
                     errors: {
@@ -206,7 +214,7 @@ export default function DetailPostPrivate() {
 
                 Alert.alert("Sucesso", "Foto excluída com sucesso!");
 
-                await fetchPost().finally(() => setLoading(false));
+                await fetchUser().finally(() => setLoading(false));
 
             }
 
@@ -216,7 +224,6 @@ export default function DetailPostPrivate() {
         }
     }
 
-    // Função para escolher a foto
     const pickImageAsync = async () => {
         // Pedir permissão para acessar a galeria
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -229,7 +236,7 @@ export default function DetailPostPrivate() {
         // Abrir a galeria
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images, // Somente imagens
-            allowsEditing: false, // Permitir edição da imagem
+            allowsEditing: true, // Permitir edição da imagem
             quality: 0.1, // Qualidade da imagem
         });
 
@@ -256,15 +263,20 @@ export default function DetailPostPrivate() {
         }
     };
 
+    const toggleShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
     useEffect(() => {
         if (error) {
             setTimeout(() => setError({
                 errors: {
                     default: undefined,
                     body: {
-                        conteudo: undefined,
-                        titulo: undefined,
-                        visivel: undefined
+                        nome: undefined,
+                        sobrenome: undefined,
+                        email: undefined,
+                        senha: undefined
                     }
                 },
                 success: {
@@ -276,9 +288,10 @@ export default function DetailPostPrivate() {
 
     useEffect(() => {
         if (id) {
-            fetchPost();
+            fetchUser();
         }
     }, [id]);
+
 
     if (loading) {
         return (
@@ -300,20 +313,22 @@ export default function DetailPostPrivate() {
                 enableOnAndroid={true}  // Ativar a rolagem automática no Android
                 extraScrollHeight={100} // Ajuste extra para garantir que o botão fique visível
             >
-                {PostForm && (
+
+                {UserForm && (
                     <View style={{ flex: 1 }}>
+
                         {/* Imagem de perfil centralizada */}
                         <View style={styles.imageContainer}>
 
                             {statePhoto === 'default' ? (
                                 <Image
-                                    source={{ uri: PostForm.foto?.uri }} // Mostra a imagem selecionada ou a atual
-                                    style={styles.image}
+                                    source={{ uri: UserForm.foto?.uri }} // Mostra a imagem selecionada ou a atual
+                                    style={styles.profileImage}
                                 />
                             ) : (
                                 <Image
                                     source={{ uri: selectedImage?.uri }} // Mostra a imagem selecionada ou a atual
-                                    style={styles.image}
+                                    style={styles.profileImage}
                                 />
                             )}
 
@@ -334,11 +349,11 @@ export default function DetailPostPrivate() {
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity style={styles.buttonUpload} onPress={pickImageAsync}>
                                         <MaterialIcons name="file-upload" size={22} color="#FFF" style={styles.iconButton} />
-                                        <Text style={styles.buttonTextUpload}>Carregar Capa</Text>
+                                        <Text style={styles.buttonTextUpload}>Carregar Foto</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.buttonDelete} onPress={handleDeletePhoto}>
                                         <MaterialIcons name="delete" size={22} color="#ED145B" style={styles.iconButton} />
-                                        <Text style={styles.buttonTextDelete}>Excluir Capa</Text>
+                                        <Text style={styles.buttonTextDelete}>Excluir Foto</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}
@@ -346,36 +361,63 @@ export default function DetailPostPrivate() {
                         </View>
 
                         <View style={styles.sectionTitleUser}>
-                            <Text style={styles.titleUser}>Informações do Post</Text>
+                            <Text style={styles.titleUser}>Informações do Usuário</Text>
                         </View>
 
                         {/* Informações do usuário */}
                         <View style={styles.userContainer}>
 
                             <View style={{ flexDirection: 'column' }}>
-                                <Text style={styles.label}>Título</Text>
+                                <Text style={styles.label}>Nome</Text>
                                 <TextInput
                                     placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
                                     style={styles.input}
-                                    value={PostForm?.titulo}
-                                    onChangeText={text => setPostForm({ ...PostForm, titulo: text })}
-                                    placeholder="Digite o título"
+                                    value={UserForm?.nome}
+                                    onChangeText={text => setUserForm({ ...UserForm, nome: text })}
+                                    placeholder="Digite o nome do usuário"
                                 />
-                                {error?.errors?.body?.titulo && (
-                                    <Text style={styles.error}>{error?.errors?.body?.titulo}</Text>
+                                {error?.errors?.body?.nome && (
+                                    <Text style={styles.error}>{error?.errors?.body?.nome}</Text>
                                 )}
                             </View>
 
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.label}>Sobrenome</Text>
+                                <TextInput
+                                    placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
+                                    style={styles.input}
+                                    value={UserForm?.sobrenome}
+                                    onChangeText={text => setUserForm({ ...UserForm, sobrenome: text })}
+                                    placeholder="Digite o sobrenome do usuário"
+                                />
+                                {error?.errors?.body?.sobrenome && (
+                                    <Text style={styles.error}>{error?.errors?.body?.sobrenome}</Text>
+                                )}
+                            </View>
 
                             <View style={{ flexDirection: 'column' }}>
-                                <Text style={styles.label}>Selecione a Visibilidade</Text>
+                                <Text style={styles.label}>E-mail</Text>
+                                <TextInput
+                                    placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
+                                    style={styles.input}
+                                    value={UserForm?.email}
+                                    onChangeText={text => setUserForm({ ...UserForm, email: text })}
+                                    placeholder="Digite o e-mail do usuário"
+                                />
+                                {error?.errors?.body?.email && (
+                                    <Text style={styles.error}>{error?.errors?.body?.email}</Text>
+                                )}
+                            </View>
+
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.label}>Selecione o status</Text>
                                 <RNPickerSelect
-                                    onValueChange={(value: 'true' | 'false') => setPostForm({ ...PostForm, visivel: value === 'true' ? true : false })}
+                                    onValueChange={(value: 'true' | 'false') => setUserForm({ ...UserForm, bloqueado: value === 'true' ? true : false })}
                                     items={[
-                                        { label: 'Visível', value: 'true' },
-                                        { label: 'Não Visível', value: 'false' }
+                                        { label: 'Bloqueado', value: 'true' },
+                                        { label: 'Desbloqueado', value: 'false' }
                                     ]}
-                                    value={PostForm?.visivel == true ? 'true' : 'false'}
+                                    value={UserForm?.bloqueado == true ? 'true' : 'false'}
 
                                     placeholder={{ label: "Selecione uma opção", value: 'true' }}
                                     darkTheme={DefaultTheme.dark}
@@ -395,28 +437,44 @@ export default function DetailPostPrivate() {
                                 />
                             </View>
 
-                            <View style={{ flexDirection: 'column' }}>
-                                <Text style={styles.label}>Conteúdo</Text>
-                                <TextInput
-                                    placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
-                                    style={[styles.input, styles.textArea]}
-                                    value={PostForm?.descricao}
-                                    onChangeText={text => setPostForm({ ...PostForm, descricao: text })}
-                                    placeholder="Digite o conteúdo"
-                                    multiline
-                                />
-                                {error?.errors?.body?.conteudo && (
-                                    <Text style={styles.error}>{error?.errors?.body?.titulo}</Text>
-                                )}
-                            </View>
+                            {(session && Number(session.userId) != Number(id)) && (
 
-                            {(PostForm?.titulo || PostForm?.descricao || PostForm?.foto) && (
+                                <View style={{ flexDirection: 'column' }}>
+                                    <Text style={styles.label}>Nova Senha</Text>
+                                    <View style={styles.containerInputPassword}>
+                                        <TextInput
+                                            secureTextEntry={!showPassword}
+                                            value={UserForm.senha}
+                                            onChangeText={text => setUserForm({ ...UserForm, senha: text })}
+                                            style={styles.inputPassword}
+                                            placeholder="Senha"
+                                            placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
+                                        />
+                                        <MaterialCommunityIcons
+                                            name={showPassword ? 'eye-off' : 'eye'}
+                                            size={24}
+                                            color={DefaultTheme.dark ? '#FFF' : '#aaa'}
+                                            style={styles.iconPassword}
+                                            onPress={toggleShowPassword}
+                                        />
+                                    </View>
 
-                                <TouchableOpacity style={styles.confirmButton} onPress={handleSubmitPost}>
-                                    <MaterialIcons name="update" size={24} color={'#FFF'} style={styles.iconButton} />
-                                    <Text style={styles.confirmButtonText}>Atualizar Post</Text>
+                                    {error?.errors?.body?.senha && (
+                                        <View style={styles.ErrorContainer}>
+                                            <Text style={styles.error}>{error?.errors?.body?.senha}</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+
+                            {(UserForm?.nome || UserForm?.sobrenome || UserForm?.email || UserForm.senha) && (
+
+                                <TouchableOpacity style={styles.confirmButton} onPress={handleSubmitUser}>
+                                    <MaterialIcons name="post-add" size={24} color={'#FFF'} style={styles.iconButton} />
+                                    <Text style={styles.confirmButtonText}>Atualizar Usuário</Text>
                                 </TouchableOpacity>
                             )}
+
                         </View>
 
 
@@ -425,7 +483,7 @@ export default function DetailPostPrivate() {
 
             </KeyboardAwareScrollView>
         </KeyboardAvoidingView >
-    );
+    )
 }
 
 const stylesTeste = (theme: IThemeMaximized) => {
@@ -434,7 +492,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         container: {
             flex: 1,
             paddingHorizontal: 16,
-            paddingBottom: 16,
+            paddingVertical: 16,
             backgroundColor: theme.colors.background,
         },
         label: {
@@ -554,7 +612,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
             fontSize: 25,
             fontWeight: 'bold',
             textAlign: 'center',
-            marginBottom: 4,
+            marginBottom: 8,
             color: theme.colors.text
         },
         userContainer: {
@@ -597,19 +655,18 @@ const stylesTeste = (theme: IThemeMaximized) => {
             justifyContent: 'center',
             height: 50,
             width: '100%',
-            backgroundColor: "#FFF",
-            borderColor: "#ccc",
+            backgroundColor: theme.colors.background,
+            borderColor: theme.colors.border,
             borderWidth: 1,
             borderRadius: 8,
             paddingHorizontal: 16,
-            color: "#333"
         },
         inputPassword: {
             flex: 1,
-            color: '#333',
             paddingVertical: 10,
             paddingRight: 10,
             fontSize: 16,
+            color: theme.colors.text,
         },
         iconPassword: {
             marginLeft: 10,

@@ -33,7 +33,7 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             <Link href={'/posts/private'} style={{ cursor: 'pointer' }}>
               <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
             </Link>
-          ) : (props.route.name === 'users/new/index') ? (
+          ) : (props.route.name === 'users/new/index' || props.route.name === 'users/detail/[id]' || props.route.name === 'users/rules/[id]') ? (
             <Link href={'/users'} style={{ cursor: 'pointer' }}>
               <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
             </Link>
@@ -86,6 +86,12 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
             )}
             {props.route.name === 'users/new/index' && (
               <Text style={styles.sectionTitle}>Novo Usuário</Text>
+            )}
+            {props.route.name === 'users/detail/[id]' && (
+              <Text style={styles.sectionTitle}>Editar Usuário</Text>
+            )}
+            {props.route.name === 'users/rules/[id]' && (
+              <Text style={styles.sectionTitle}>Gerenciar Permissões</Text>
             )}
           </View>
         )

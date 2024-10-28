@@ -404,7 +404,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         },
         imageContainer: {
             alignItems: 'center',
-            marginBottom: 16,
+            marginBottom: 10,
         },
         image: {
             width: '100%',
@@ -488,7 +488,6 @@ const stylesTeste = (theme: IThemeMaximized) => {
             marginRight: 8,
         },
         sectionTitleUser: {
-            marginTop: 12,
             marginBottom: 10,
             justifyContent: 'center',
             alignItems: 'center'

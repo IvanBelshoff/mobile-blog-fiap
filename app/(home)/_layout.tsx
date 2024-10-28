@@ -158,6 +158,32 @@ export default function HomeLayout() {
                 />
 
                 <Drawer.Screen
+                    name="users/detail/[id]"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        ),
+
+                    }}
+                />
+
+                <Drawer.Screen
+                    name="users/rules/[id]"
+                    options={{
+                        header: (props) => (
+                            <Header
+                                props={props}
+                                onSearch={(filter) => handleSearchParams(filter)} // Passa a função para atualizar o estado da pesquisa
+                            />
+                        ),
+
+                    }}
+                />
+
+                <Drawer.Screen
                     name="settings/index"
                     options={{
                         header: (props) => (

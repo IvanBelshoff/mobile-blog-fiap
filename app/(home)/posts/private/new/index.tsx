@@ -252,7 +252,7 @@ export default function NewPostPrivate() {
 
 
                             )}
-                            
+
                             {(PostForm?.titulo || PostForm?.descricao) && (
                                 <TouchableOpacity style={styles.buttonDelete} onPress={resetForm}>
                                     <MaterialIcons name="clear-all" size={22} color={DefaultTheme.colors.primary} style={styles.iconButton} />
@@ -262,6 +262,10 @@ export default function NewPostPrivate() {
 
                         </View>
 
+                    </View>
+
+                    <View style={styles.sectionTitleUser}>
+                        <Text style={styles.titleUser}>Informações do Post</Text>
                     </View>
 
                     {/* Informações do usuário */}
@@ -375,7 +379,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         },
         imageContainer: {
             alignItems: 'center',
-            marginBottom: 16,
+            marginBottom: 10,
         },
         image: {
             width: '100%',
@@ -459,7 +463,6 @@ const stylesTeste = (theme: IThemeMaximized) => {
             marginRight: 8,
         },
         sectionTitleUser: {
-            marginTop: 12,
             marginBottom: 10,
             justifyContent: 'center',
             alignItems: 'center'
