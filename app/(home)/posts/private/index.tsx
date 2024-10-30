@@ -1,4 +1,5 @@
 import CardPostPrivate from "@/components/Cards/CardPostPrivate";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { Environment } from "@/environment";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
@@ -25,6 +26,7 @@ export default function PrivatePosts() {
     const [viewArrowUp, setViewArrowUp] = useState<boolean>(false);
     const [postOptions, setPostOptions] = useState<Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'> | null>(null);
     const [openbottomSheetRef, setOpenBottomSheetRef] = useState<boolean>(false);
+    const { session } = useAuth();
 
     const fetchData = async (page: string, filter: string): Promise<IPosts[] | AxiosError> => {
 
@@ -212,6 +214,7 @@ export default function PrivatePosts() {
             </View>
         );
     }
+
     return (
         <View style={{ flex: 1, }}>
             {error && (
@@ -234,13 +237,28 @@ export default function PrivatePosts() {
                     <CardPostPrivate
                         post={item}
                         index={index}
+                        viewOptions={(session && (Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_POSTAGEM]) || Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_DELETAR_POSTAGEM]))) ? true : false}
+                        createPost={(session && !Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_CRIAR_POSTAGEM])) ? true : false}
                         aoClicarEmPost={() => {
-                            router.push({
-                                pathname: '/posts/private/detail/[id]',
-                                params: { id: item.id }
-                            });
+                            if (session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_POSTAGEM])) {
+                                router.push({
+                                    pathname: '/posts/private/detail/[id]',
+                                    params: { id: item.id }
+                                });
+                            }
                         }}
-                        aoClicarEmBottomSheet={openBottomSheet}
+                        aoClicarEmBottomSheet={(post) => {
+
+                            if (session) {
+                                const updatePost = Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_POSTAGEM]);
+                                const deletePost = Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_DELETAR_POSTAGEM]);
+
+                                if (updatePost || deletePost) {
+                                    openBottomSheet(post)
+                                }
+                            }
+
+                        }}
                     />
                 }
                 keyExtractor={(item) => item.id.toString() + item.titulo}
@@ -312,21 +330,25 @@ export default function PrivatePosts() {
                                 </TouchableOpacity>
                             )}
 
-                            <TouchableOpacity
-                                style={styles.option}
-                                onPress={() => router.push({
-                                    pathname: '/posts/private/detail/[id]',
-                                    params: { id: postOptions.id }
-                                })}>
-                                <MaterialIcons name="edit" size={30} color={'#FFF'} />
-                            </TouchableOpacity>
+                            {(session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_POSTAGEM])) && (
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => router.push({
+                                        pathname: '/posts/private/detail/[id]',
+                                        params: { id: postOptions.id }
+                                    })}>
+                                    <MaterialIcons name="edit" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
 
-                            <TouchableOpacity
-                                style={styles.option}
-                                onPress={() => confirmDeletePost(postOptions.id)} // Chama a função que exibirá o modal
-                            >
-                                <MaterialIcons name="delete" size={30} color={'#FFF'} />
-                            </TouchableOpacity>
+                            {(session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_DELETAR_POSTAGEM])) && (
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => confirmDeletePost(postOptions.id)} // Chama a função que exibirá o modal
+                                >
+                                    <MaterialIcons name="delete" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
 
                         </View>
 

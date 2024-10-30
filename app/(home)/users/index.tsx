@@ -240,8 +240,24 @@ export default function Users() {
                 renderItem={({ item, index }) => (
                     <CardUser
                         index={index}
-                        aoClicarEmBottomSheet={openBottomSheet}
-                        aoClicarEmUser={() => viewUser(item.id)}
+                        createUser={(session && !Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_CRIAR_USUARIO])) ? true : false}
+                        aoClicarEmBottomSheet={(user) => {
+
+                            if (session) {
+                                const updateUser = Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_USUARIO]);
+                                const manageRules = Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_ADMIN]);
+                                const deleteUser = Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_DELETAR_USUARIO]);
+
+                                if (updateUser || manageRules || deleteUser) {
+                                    openBottomSheet(user)
+                                }
+                            }
+                        }}
+                        aoClicarEmUser={() => {
+                            if (session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_USUARIO])) {
+                                viewUser(item.id);
+                            }
+                        }}
                         user={item}
                         key={item.id}
                     />
@@ -315,27 +331,32 @@ export default function Users() {
                         </View>
 
                         <View style={styles.optionsContainer}>
-                            <TouchableOpacity
-                                style={styles.option}
-                                onPress={() => router.push({
-                                    pathname: '/users/detail/[id]',
-                                    params: { id: userOptions.id }
-                                })}
-                            >
-                                <MaterialIcons name="edit" size={30} color={'#FFF'} />
-                            </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={styles.option}
-                                onPress={() => router.push({
-                                    pathname: '/users/rules/[id]',
-                                    params: { id: userOptions.id }
-                                })}
-                            >
-                                <MaterialIcons name="rule" size={30} color={'#FFF'} />
-                            </TouchableOpacity>
+                            {(session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_ATUALIZAR_USUARIO])) && (
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => router.push({
+                                        pathname: '/users/detail/[id]',
+                                        params: { id: userOptions.id }
+                                    })}
+                                >
+                                    <MaterialIcons name="edit" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
 
-                            {(session && Number(session.userId) != userOptions.id) && (
+                            {(session && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_ADMIN])) && (
+                                <TouchableOpacity
+                                    style={styles.option}
+                                    onPress={() => router.push({
+                                        pathname: '/users/rules/[id]',
+                                        params: { id: userOptions.id }
+                                    })}
+                                >
+                                    <MaterialIcons name="rule" size={30} color={'#FFF'} />
+                                </TouchableOpacity>
+                            )}
+
+                            {(session && (Number(session.userId) != userOptions.id) && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_DELETAR_USUARIO])) && (
                                 <TouchableOpacity
                                     style={styles.option}
                                     onPress={() => confirmDeleteUser(userOptions.id)}

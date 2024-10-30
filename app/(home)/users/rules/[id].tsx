@@ -1,5 +1,6 @@
 import CardUserRoles from "@/components/Cards/CardUserRoles";
 import UserPermission from "@/components/UserPermission";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 import { RegrasService } from "@/services/Regras/regrasService";
@@ -58,6 +59,8 @@ export default function RulesManagement() {
     const { id } = useLocalSearchParams();
     const [error, setError] = useState<INovoUsuarioAction | undefined>(undefined);
     const bottomSheetRef = useRef<BottomSheet>(null);
+
+    const { session } = useAuth();
 
     const [user, setUser] = useState<IUsuarioCompleto | undefined>(undefined);
     const [userRole, setUserRole] = useState<IRegra[] | []>([]);
@@ -366,7 +369,11 @@ export default function RulesManagement() {
                 <View style={styles.containerMain}>
 
                     {(role && userRole) && role.map((role) => (
-                        <CardUserRoles key={role.id} role={role} userRole={userRole} aoClicarNoCard={openBottomSheet} />
+                        <CardUserRoles key={role.id} role={role} userRole={userRole} aoClicarNoCard={(rule) => {
+                            if (session && (Number(session.userId) != Number(id))) {
+                                openBottomSheet(rule);
+                            }
+                        }} />
                     ))}
 
                     {(ruleOptions && userRole) && (
@@ -428,12 +435,14 @@ export default function RulesManagement() {
                                     )}
                                 </View>
 
-                                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                    <TouchableOpacity style={styles.confirmButton} onPress={handleSubmit}>
-                                        <MaterialIcons name="rule" size={24} color={'#FFF'} style={styles.iconButton} />
-                                        <Text style={styles.confirmButtonText}>Atualizar Permissões</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                {session && (Number(session.userId) != Number(id)) && (
+                                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                        <TouchableOpacity style={styles.confirmButton} onPress={handleSubmit}>
+                                            <MaterialIcons name="rule" size={24} color={'#FFF'} style={styles.iconButton} />
+                                            <Text style={styles.confirmButtonText}>Atualizar Permissões</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
 
                             </BottomSheetView>
                         </BottomSheet>
