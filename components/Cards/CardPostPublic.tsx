@@ -26,13 +26,18 @@ const CardPostPublic = React.memo(({ post, aoClicarEmPost }: { post: IPosts, aoC
                 />
             )}
 
+            {/* Título centralizado */}
+            <Text style={styles.conteudo}>{post.conteudo.substring(0, 130)}...</Text>
+
             {/* Autor e data de criação */}
             <View style={styles.footer}>
                 <Text style={styles.author}>Autor: {post.usuario_cadastrador}</Text>
                 <Text style={styles.date}>
-                    {new Date(post.data_criacao).toLocaleDateString()}
+                    {new Date(post.data_criacao).toLocaleDateString("pt-BR")}
                 </Text>
             </View>
+
+
 
         </TouchableOpacity>
     );
@@ -60,6 +65,14 @@ const stylesTeste = (theme: Theme) => {
             width: '100%',
             height: 200,
             borderRadius: 8,
+            marginBottom: 12,
+        },
+        conteudo: {
+            fontSize: 14,
+            fontWeight: 'light',
+            textAlign: 'left',
+            paddingHorizontal: 25,
+            color: theme.colors.text,
             marginBottom: 12,
         },
         footer: {

@@ -33,7 +33,7 @@ const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomShee
                 <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={styles.author}>Autor: {post.usuario_cadastrador}</Text>
                     <Text style={styles.date}>
-                        {new Date(post.data_criacao).toLocaleDateString()}
+                        {new Date(post.data_criacao).toLocaleDateString("pt-BR")}
                     </Text>
                 </View>
 
