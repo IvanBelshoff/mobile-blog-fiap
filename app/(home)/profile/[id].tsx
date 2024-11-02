@@ -383,63 +383,56 @@ export default function Profile() {
 
                         {/* Informações do usuário */}
                         <View style={styles.userContainer}>
-
-                            <View style={styles.containerInput}>
-
-                                <Text style={styles.labelInput}>Nome:</Text>
-
-                                <TextInput
-                                    style={styles.input}
-                                    editable={false}
-                                    placeholder="Email"
-                                    value={`${usuario.nome} ${usuario.sobrenome}`}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    placeholderTextColor="#aaa"
-                                />
-
-                                <ContentCopy
-                                    value={`${usuario.nome} ${usuario.sobrenome}`}
-                                    aoClicarEmCopy={handleCopy}
-                                />
-
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.labelInput}>Nome</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                    <TextInput
+                                        placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
+                                        style={styles.input}
+                                        value={`${usuario.nome} ${usuario.sobrenome}`}
+                                        editable={false}
+                                        placeholder="nome sobrenome"
+                                        keyboardType="default"
+                                        autoCapitalize="none"
+                                    />
+                                    <ContentCopy
+                                        value={`${usuario.nome} ${usuario.sobrenome}`}
+                                        aoClicarEmCopy={handleCopy}
+                                    />
+                                </View>
                             </View>
 
-                            <View style={styles.containerInput}>
-
-                                <Text style={styles.labelInput}>E-mail:</Text>
-
+                            <View style={{ flexDirection: 'column' }}>
+                                <Text style={styles.labelInput}>E-mail</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                                 <TextInput
+                                    placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
                                     style={styles.input}
                                     editable={false}
                                     placeholder="Email"
                                     value={usuario.email}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
-                                    placeholderTextColor="#aaa"
                                 />
-
                                 <ContentCopy
                                     value={usuario.email}
                                     aoClicarEmCopy={handleCopy}
                                 />
-
+                                </View>
                             </View>
 
                             <View style={{ flex: 1 }} />
 
-                            <View style={styles.containetResetPassword}>
-
+                            <View style={styles.containerResetPassword}>
                                 <Text style={styles.sectionTitle}>Alterar Senha</Text>
-
                                 <View style={styles.containerInputPassword}>
                                     <TextInput
+                                        placeholderTextColor={DefaultTheme.dark ? '#FFF' : '#333'}
                                         secureTextEntry={!showPassword}
                                         value={password}
                                         onChangeText={handleChangePassword}
                                         style={styles.inputPassword}
                                         placeholder="Senha"
-                                        placeholderTextColor="#aaa"
                                     />
                                     <MaterialCommunityIcons
                                         name={showPassword ? 'eye-off' : 'eye'}
@@ -455,21 +448,17 @@ export default function Profile() {
                                         <Text style={styles.error}>{error?.errors?.body?.senha}</Text>
                                     </View>
                                 )}
-                                {password && (
-                                    <TouchableOpacity style={styles.confirmButton} onPress={handleResetPassword}>
-                                        <MaterialIcons name="password" size={24} color={'#FFF'} style={styles.iconButton} />
-                                        <Text style={styles.confirmButtonText}>Atualizar Senha</Text>
-                                    </TouchableOpacity>
-                                )}
+
+
 
                             </View>
-
+                            <TouchableOpacity disabled={!password} style={[ styles.confirmButton, !password ? styles.disabledButton : null ]} onPress={handleResetPassword}>
+                                <MaterialIcons name="password" size={24} color={'#FFF'} style={styles.iconButton} />
+                                <Text style={styles.confirmButtonText}>Atualizar Senha</Text>
+                            </TouchableOpacity>
                         </View>
-
-
                     </View>
                 )}
-
             </KeyboardAwareScrollView>
         </KeyboardAvoidingView >
     );
@@ -577,16 +566,12 @@ const stylesTeste = (theme: IThemeMaximized) => {
         userContainer: {
             flexDirection: 'column',
             flex: 1,
-            gap: 15,
-            marginTop: 5,
             justifyContent: 'flex-start',
             borderColor: theme.colors.border,
             borderWidth: 1,
-            borderRadius: 10,
-            paddingTop: 25,
-            paddingBottom: 25,
-            paddingLeft: 10,
-            paddingRight: 10,
+            borderRadius: 8,
+            gap: 10,
+            padding: 10,
         },
         containerInput: {
             flexDirection: 'row',
@@ -602,6 +587,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
             borderWidth: 1,
             borderRadius: 8,
             paddingHorizontal: 16,
+            marginRight: 15,
             color: "#333"
         },
         labelInput: {
@@ -609,12 +595,13 @@ const stylesTeste = (theme: IThemeMaximized) => {
             alignItems: 'center',
             fontSize: 18,
             fontWeight: 'bold',
-            color: theme.colors.text
+            color: theme.colors.text,
+            paddingBottom: 10
         },
-        containetResetPassword: {
+        containerResetPassword: {
             flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
             gap: 22
         },
         sectionTitle: {
@@ -650,9 +637,14 @@ const stylesTeste = (theme: IThemeMaximized) => {
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: theme.colors.primary,
+            marginTop: 10,
+            marginHorizontal: 50,
             paddingVertical: 10,
             paddingHorizontal: 10,
             borderRadius: 8,
+        },
+        disabledButton: {
+            backgroundColor: '#d3d3d3',
         },
         confirmButtonText: {
             color: '#fff',
