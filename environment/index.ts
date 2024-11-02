@@ -41,6 +41,8 @@ export const Environment = {
 
     BASE_URL: process.env.EXPO_PUBLIC_BASE_URL,
 
+    WEB_URL: process.env.EXPO_PUBLIC_WEB_URL,
+
     LISTAGEM_VAZIA: process.env.EXPO_PUBLIC_LISTAGEM_VAZIA,
 
     LIMITE_DE_POSTS: process.env.EXPO_PUBLIC_LIMITE_DE_POSTS,
