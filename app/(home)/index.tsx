@@ -103,6 +103,7 @@ export default function Index() {
         ref={flatListRef}
         data={posts}
         style={{ gap: 10, marginLeft: 10, marginRight: 10 }}
+        showsVerticalScrollIndicator={false}
         initialNumToRender={10}
         maxToRenderPerBatch={5}
         getItemLayout={(_, index) => (
