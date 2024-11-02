@@ -6,6 +6,7 @@ import { Link, router } from 'expo-router';
 import { Environment } from '@/environment';
 import { useAppThemeContext } from '@/contexts/ThemeContext';
 import { Theme } from '@react-navigation/native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header({ props, onSearch }: { props: DrawerHeaderProps, onSearch: (query: string) => void }) {
   // Estado para o texto do input
@@ -16,6 +17,8 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
     setSearchQuery(''); // Limpa o texto
     onSearch(''); // Atualiza o estado da pesquisa
   };
+
+  const { session } = useAuth();
 
   const { DefaultTheme } = useAppThemeContext();
 
@@ -42,7 +45,6 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
               <Ionicons name="chevron-back-outline" size={25} color="#FFF" />
             </TouchableOpacity>
           )
-
         ) : (
           <Link href={`/?filter=&page=1`} style={{ cursor: 'pointer' }}>
             <MaterialIcons name="home" size={28} color="#FFF" />
@@ -103,27 +105,23 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
 
       </View>
 
-      {
-        props.route.name === 'posts/private/index' && (
-          <View style={styles.headerContainerButton}>
-            <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/posts/private/new')}>
-              <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
-              <Text style={styles.buttonTextUpload}>Novo Post</Text>
-            </TouchableOpacity>
-          </View>
-        )
-      }
+      {(session && props.route.name === 'posts/private/index' && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_PROFESSOR], session.permissoes, [Environment.PERMISSOES.PERMISSAO_CRIAR_POSTAGEM])) && (
+        <View style={styles.headerContainerButton}>
+          <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/posts/private/new')}>
+            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
+            <Text style={styles.buttonTextUpload}>Novo Post</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-      {
-        props.route.name === 'users/index' && (
-          <View style={styles.headerContainerButton}>
-            <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/users/new')}>
-              <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
-              <Text style={styles.buttonTextUpload}>Novo Usuário</Text>
-            </TouchableOpacity>
-          </View>
-        )
-      }
+      {(session && props.route.name === 'users/index' && Environment.validaRegraPermissaoComponents(session.regras, [Environment.REGRAS.REGRA_USUARIO], session.permissoes, [Environment.PERMISSOES.PERMISSAO_CRIAR_USUARIO])) && (
+        <View style={styles.headerContainerButton}>
+          <TouchableOpacity style={styles.buttonAddContainer} onPress={() => router.push('/users/new')}>
+            <MaterialIcons style={styles.iconButton} name="add" size={24} color={DefaultTheme.dark ? DefaultTheme.colors.primary : '#FFF'} />
+            <Text style={styles.buttonTextUpload}>Novo Usuário</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
     </View >
   );

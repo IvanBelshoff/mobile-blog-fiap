@@ -48,6 +48,14 @@ export default function CardUserRoles({ role, userRole, aoClicarNoCard }: ICardU
         }
     };
 
+
+    function capitalizeWords(text: string): string {
+        return text
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
+    }
+
     return (
         <TouchableOpacity onPress={() => aoClicarNoCard(role)} style={styles.cardContainer}>
             <View style={styles.sectiontitleRule}>
@@ -115,7 +123,7 @@ export default function CardUserRoles({ role, userRole, aoClicarNoCard }: ICardU
                             >
                                 {typeIcon(role.nome)}
                                 <Text style={styles.iconText}>
-                                    Visualizar {role.nome == 'REGRA_USUARIO' ? 'usuario' : 'postagem'}
+                                    {capitalizeWords(`Visualizar ${role.nome == 'REGRA_USUARIO' ? 'usuario' : 'postagem'}`)}
                                 </Text>
                             </View>
                         ) : (
@@ -127,14 +135,17 @@ export default function CardUserRoles({ role, userRole, aoClicarNoCard }: ICardU
                             >
                                 {typeIcon(role.nome)}
                                 <Text style={styles.iconText}>
-                                    Visualizar {role.nome == 'REGRA_USUARIO' ? 'usuario' : 'postagem'}
+                                    {capitalizeWords(`Visualizar ${role.nome == 'REGRA_USUARIO' ? 'usuario' : 'postagem'}`)}
                                 </Text>
                             </View>
                         )}
                         {role.permissao.map((permission) => {
 
+                            const possuiPermissao = userRole.filter((userRegra) => userRegra.id === role.id)
+                            .map((userRegra) => userRegra.permissao)
+                            .flat()
+                            .some((userPermission) => userPermission.nome === permission.nome);
 
-                            const possuiPermissao = usuarioPossuiPermissao(permission.id, userRole);
                             return (
                                 <View
                                     key={permission.id}
@@ -145,7 +156,7 @@ export default function CardUserRoles({ role, userRole, aoClicarNoCard }: ICardU
                                 >
                                     {typeIcon(permission.nome)}
                                     <Text style={styles.iconText}>
-                                        {capturarTipoPermissao(permission.nome)} {capturarAcaoPermissao(permission.nome)}
+                                        {capitalizeWords(`${capturarTipoPermissao(permission.nome)} ${capturarAcaoPermissao(permission.nome)}`)}
                                     </Text>
                                 </View>
                             );

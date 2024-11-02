@@ -6,12 +6,11 @@ import { format } from 'date-fns';
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
-const CardUser = React.memo(({ user, aoClicarEmUser, aoClicarEmBottomSheet, index }: { user: IUsuarioCompleto, aoClicarEmUser: () => void, aoClicarEmBottomSheet: (user: Pick<IUsuarioCompleto, 'id' | 'foto' | 'nome' | 'sobrenome' | 'email'>) => void, index: number }) => {
-
+const CardUser = React.memo(({ user, aoClicarEmUser, aoClicarEmBottomSheet, index, createUser }: { user: IUsuarioCompleto, aoClicarEmUser: () => void, aoClicarEmBottomSheet: (user: Pick<IUsuarioCompleto, 'id' | 'foto' | 'nome' | 'sobrenome' | 'email'>) => void, index: number, createUser: boolean }) => {
 
     const { DefaultTheme } = useAppThemeContext();
 
-    const styles = stylesTeste(DefaultTheme, index);
+    const styles = stylesTeste(DefaultTheme, index, createUser);
 
     return (
         <View style={styles.card} id={user.id.toString()}>
@@ -41,7 +40,7 @@ const CardUser = React.memo(({ user, aoClicarEmUser, aoClicarEmBottomSheet, inde
 });
 
 // Modifique a função para aceitar o índice
-const stylesTeste = (theme: Theme, index: number) => {
+const stylesTeste = (theme: Theme, index: number, createUser: boolean) => {
     return StyleSheet.create({
         card: {
             borderWidth: 1,
@@ -49,7 +48,7 @@ const stylesTeste = (theme: Theme, index: number) => {
             borderColor: theme.dark ? '#9CA3AF' : theme.colors.border,
             borderRadius: 8,
             padding: 10,
-            marginTop: index === 0 ? 0 : 8,  // Remover marginTop do primeiro item
+            marginTop: (index === 0 && !createUser) ? 0 : 8,  // Remover marginTop do primeiro item
             marginBottom: 8,
             backgroundColor: theme.colors.card,
             justifyContent: 'center',

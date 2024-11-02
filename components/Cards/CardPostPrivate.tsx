@@ -5,11 +5,11 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomSheet, index }: { post: IPosts, aoClicarEmPost: () => void, aoClicarEmBottomSheet: (post: Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'>) => void, index: number }) => {
+const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomSheet, index, createPost, viewOptions }: { post: IPosts, aoClicarEmPost: () => void, aoClicarEmBottomSheet: (post: Pick<IPosts, 'id' | 'foto' | 'titulo' | 'visivel'>) => void, index: number, createPost: boolean, viewOptions: boolean }) => {
 
     const { DefaultTheme } = useAppThemeContext();
 
-    const styles = stylesTeste(DefaultTheme, index);
+    const styles = stylesTeste(DefaultTheme, index, createPost, viewOptions);
 
     return (
         <View style={styles.card} id={post.id.toString()}>
@@ -30,17 +30,21 @@ const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomShee
 
             {/* Autor e data de criação */}
             <View style={styles.footer}>
-                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+
+                <View style={styles.sectionOptions}>
                     <Text style={styles.author}>Autor: {post.usuario_cadastrador}</Text>
                     <Text style={styles.date}>
                         {new Date(post.data_criacao).toLocaleDateString("pt-BR")}
                     </Text>
                 </View>
 
-                {/* Menu suspenso com ícone de opções */}
-                <TouchableOpacity onPress={() => aoClicarEmBottomSheet({ id: post.id, titulo: post.titulo, foto: post.foto, visivel: post.visivel })} style={{ alignItems: 'flex-end' }}>
-                    <MaterialIcons name="more-vert" size={24} color={DefaultTheme.dark ? '#FFFFFFB3' : '#555'} />
-                </TouchableOpacity>
+
+                {viewOptions && (
+                    <TouchableOpacity onPress={() => aoClicarEmBottomSheet({ id: post.id, titulo: post.titulo, foto: post.foto, visivel: post.visivel })} style={{ alignItems: 'flex-end' }}>
+                        <MaterialIcons name="more-vert" size={24} color={DefaultTheme.dark ? '#FFFFFFB3' : '#555'} />
+                    </TouchableOpacity>
+                )}
+
             </View>
 
         </View>
@@ -48,18 +52,17 @@ const CardPostPrivate = React.memo(({ post, aoClicarEmPost, aoClicarEmBottomShee
 });
 
 // Modifique a função para aceitar o índice
-const stylesTeste = (theme: Theme, index: number) => {
+const stylesTeste = (theme: Theme, index: number, createPost: boolean, viewOptions: boolean) => {
     return StyleSheet.create({
         card: {
             borderWidth: 1,
             borderColor: theme.dark ? '#9CA3AF' : theme.colors.border,
             borderRadius: 8,
             padding: 16,
-            marginTop: index === 0 ? 0 : 8,  // Remover marginTop do primeiro item
+            marginTop: (index === 0 && !createPost) ? 0 : 8,   // Remover marginTop do primeiro item
             marginBottom: 8,
             backgroundColor: theme.colors.card,
         },
-
         title: {
             fontSize: 18,
             fontWeight: 'bold',
@@ -75,8 +78,14 @@ const stylesTeste = (theme: Theme, index: number) => {
         },
         footer: {
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
+            justifyContent: 'space-between',
+        },
+        sectionOptions: {
+            width: viewOptions ? 'auto' : '100%',
+            flexDirection: viewOptions ? 'column' : 'row',
+            justifyContent: viewOptions ? 'center' : 'space-between',
+            alignItems: 'center'
         },
         author: {
             fontSize: 14,

@@ -1,16 +1,18 @@
 import CardUserRoles from "@/components/Cards/CardUserRoles";
 import UserPermission from "@/components/UserPermission";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 import { RegrasService } from "@/services/Regras/regrasService";
-import { IRegra, IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
+import { IPermissao, IRegra, IUsuarioCompleto } from "@/services/Usuarios/interfaces/interfaces";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { AxiosError } from "axios";
+import { set } from "date-fns";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import { View, Text, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { Checkbox } from "react-native-paper";
 
@@ -58,12 +60,56 @@ export default function RulesManagement() {
     const [error, setError] = useState<INovoUsuarioAction | undefined>(undefined);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
+    const { session } = useAuth();
+
     const [user, setUser] = useState<IUsuarioCompleto | undefined>(undefined);
-    const [userRole, setUserRole] = useState<IRegra[] | undefined>();
-    const [role, setRole] = useState<IRegra[] | undefined>();
+    const [userRole, setUserRole] = useState<IRegra[] | []>([]);
+    const [role, setRole] = useState<IRegra[] | []>([]);
     const [openbottomSheetRef, setOpenBottomSheetRef] = useState<boolean>(false);
     const [ruleOptions, setRuleOptions] = useState<IRegra | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [checkboxStateRegras, setCheckboxStateRegras] = useState<number[]>([]);
+    const [checkboxStatePermissoes, setCheckboxStatePermissoes] = useState<number[]>([]);
+
+    const handleSubmit = async () => {
+
+        try {
+            setLoading(true);
+
+            const response = await UsuariosService.UpdateRolesAndPermissionsById(Number(id), checkboxStateRegras, checkboxStatePermissoes);
+
+            if (response instanceof AxiosError) {
+                setLoading(false);
+                const errors = (response as IActionNovoUsuario).response?.data.errors;
+                setError({
+                    errors: {
+                        default: errors?.default,
+                        body: {
+                            nome: errors?.body?.nome,
+                            sobrenome: errors?.body?.sobrenome,
+                            email: errors?.body?.email,
+                            senha: errors?.body?.senha
+                        }
+                    }
+                });
+
+            } else {
+                Alert.alert("Sucesso", "Regras e permissões atualizadas com sucesso.");
+
+                Promise.all([
+                    fetchUser(),
+                    fetchRoles(),
+                    fetchUserRoles()
+                ]).finally(() => {
+                    closeBottomSheet()
+                    setLoading(false)
+                });
+            }
+        } catch (error) {
+            Alert.alert("Erro", "Falha ao enviar o post.");
+            console.error(error);
+        }
+    };
 
     const fetchUser = async () => {
 
@@ -157,6 +203,12 @@ export default function RulesManagement() {
                 return;
             } else {
                 setUserRole(data);
+
+                const idsRegras = data.map(regra => regra.id);
+                const idsPermissoes = data.map(regra => regra.permissao.map(permissao => permissao.id)).flat();
+                // Configura os ids em setCheckboxStateRegras
+                setCheckboxStateRegras(idsRegras);
+                setCheckboxStatePermissoes(idsPermissoes);
             }
 
         } catch (error) {
@@ -187,6 +239,10 @@ export default function RulesManagement() {
         } else {
             bottomSheetRef.current?.expand(); // Abre a folha completamente (ou use snapToIndex para controlar o estado)
         }
+    };
+
+    const closeBottomSheet = () => {
+        bottomSheetRef.current?.close();
     };
 
     const HandleFormatarString = (input: string): string => {
@@ -223,24 +279,9 @@ export default function RulesManagement() {
             .join(' ');
     }
 
-    const HandleVerificarIds = (ids: number[], id: number) => {
-        // Verifica se o id já está presente no array
-        const isIdPresente = ids.includes(id);
-
-        if (isIdPresente) {
-            // Se o id já estiver presente, remove-o do array
-            const novosIdsRegras = ids.filter((regraId) => regraId !== id);
-
-            return novosIdsRegras;
-
-        } else {
-            // Se o id não estiver presente, adiciona-o ao array
-            return [...ids, id];
-        }
+    const handleCheckboxChangeRegras = (ids: number[]) => {
+        setCheckboxStateRegras(ids);
     };
-
-    const [checkboxStatePermissoes, setCheckboxStatePermissoes] = useState<number[]>([]);
-    const [checkboxStateRegras, setCheckboxStateRegras] = useState<number[]>([]);
 
     const handleFindRuleByIdsPermissions = (regras: IRegra[], ids: number[]): number[] => {
 
@@ -265,19 +306,32 @@ export default function RulesManagement() {
 
         setCheckboxStatePermissoes(() => ids);
 
-        if (role) {
-            const regrasChecadas = handleFindRuleByIdsPermissions(role, ids);
+        const regrasChecadas = handleFindRuleByIdsPermissions(role, ids);
 
-            if (!regrasChecadas.every(regra => checkboxStateRegras.includes(regra))) {
+        if (!regrasChecadas.every(regra => checkboxStateRegras.includes(regra))) {
 
-                const regrasFaltando = regrasChecadas.filter(regra => !checkboxStateRegras.includes(regra));
+            const regrasFaltando = regrasChecadas.filter(regra => !checkboxStateRegras.includes(regra));
 
-                setCheckboxStateRegras([...checkboxStateRegras, ...regrasFaltando]);
+            setCheckboxStateRegras([...checkboxStateRegras, ...regrasFaltando]);
 
-            }
         }
 
+    };
 
+    const HandleVerificarIds = (ids: number[], id: number) => {
+        // Verifica se o id já está presente no array
+        const isIdPresente = ids.includes(id);
+
+        if (isIdPresente) {
+            // Se o id já estiver presente, remove-o do array
+            const novosIdsRegras = ids.filter((regraId) => regraId !== id);
+
+            return novosIdsRegras;
+
+        } else {
+            // Se o id não estiver presente, adiciona-o ao array
+            return [...ids, id];
+        }
     };
 
     useEffect(() => {
@@ -287,6 +341,15 @@ export default function RulesManagement() {
             fetchUserRoles();
         }
     }, [id]);
+
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size={50} color={DefaultTheme.colors.primary} />
+                <Text style={{ color: DefaultTheme.colors.text }}>Carregando informações...</Text>
+            </View>
+        );
+    }
 
     return (
         <KeyboardAvoidingView
@@ -306,13 +369,17 @@ export default function RulesManagement() {
                 <View style={styles.containerMain}>
 
                     {(role && userRole) && role.map((role) => (
-                        <CardUserRoles key={role.id} role={role} userRole={userRole} aoClicarNoCard={openBottomSheet} />
+                        <CardUserRoles key={role.id} role={role} userRole={userRole} aoClicarNoCard={(rule) => {
+                            if (session && (Number(session.userId) != Number(id))) {
+                                openBottomSheet(rule);
+                            }
+                        }} />
                     ))}
 
                     {(ruleOptions && userRole) && (
                         <BottomSheet
                             ref={bottomSheetRef}
-                            snapPoints={['60%']}
+                            snapPoints={['65%']}
                             onChange={handleSheetChanges}
                             enablePanDownToClose={true}
                             onClose={() => setOpenBottomSheetRef(false)}
@@ -327,29 +394,37 @@ export default function RulesManagement() {
                             handleIndicatorStyle={{ backgroundColor: DefaultTheme.colors.primary }}
                         >
                             <BottomSheetView style={styles.contentContainer}>
+
                                 <Text style={styles.ruleName}>{HandleFormatarString(ruleOptions.nome)}</Text>
 
                                 <View style={styles.permissionsContainer}>
 
                                     <View style={styles.permissionItem}>
                                         <Checkbox
-                                            status={'checked'}
-                                            onPress={() => {/* Função para atualizar o valor da permissão */ }}
+                                            status={checkboxStateRegras.some(regraUsuario => regraUsuario === ruleOptions.id) ? 'checked' : 'unchecked'}
+                                            onPress={() => handleCheckboxChangeRegras(HandleVerificarIds(checkboxStateRegras, ruleOptions.id))}
                                             color={DefaultTheme.colors.primary}
+                                            uncheckedColor={DefaultTheme.dark ? '#FFF' : '#000'}
                                         />
-                                        <Text style={styles.permissionText}>{capitalizeWords(`Visualizar ${ruleOptions.nome == 'REGRA_USUARIO' ? 'Usuário' : 'Postagem'}`)}</Text>
-                                        <MaterialCommunityIcons name="eye" size={25} color={DefaultTheme.colors.primary} />
-
+                                        <Text style={styles.permissionText}>{ruleOptions.nome == 'REGRA_ADMIN' ? capitalizeWords('Administrador') : capitalizeWords(`Visualizar ${ruleOptions.nome == 'REGRA_USUARIO' ? 'Usuário' : 'Postagem'}`)}</Text>
+                                        {ruleOptions.nome == 'REGRA_ADMIN' ? (
+                                            <MaterialIcons name="admin-panel-settings" size={25} color={DefaultTheme.colors.primary} />
+                                        ) : (
+                                            <MaterialCommunityIcons name="eye" size={25} color={DefaultTheme.colors.primary} />
+                                        )}
                                     </View>
 
-                                    {ruleOptions.permissao.map((permission) => {
+                                    {ruleOptions.permissao && ruleOptions.permissao.map((permission) => {
+
+                                        const possuiPermissao = checkboxStatePermissoes.some(permissaoUsuario => permissaoUsuario === permission.id);
 
                                         return (
                                             <View key={permission.id} style={styles.permissionItem}>
                                                 <Checkbox
                                                     color={DefaultTheme.colors.primary}
-                                                    status={checkboxStatePermissoes.some(permissaoUsuario => permissaoUsuario === permission.id) ? 'checked' : 'unchecked'}
+                                                    status={possuiPermissao ? 'checked' : 'unchecked'}
                                                     onPress={() => handleCheckboxChangePermissoes(HandleVerificarIds(checkboxStatePermissoes, permission.id))}
+                                                    uncheckedColor={DefaultTheme.dark ? '#FFF' : '#000'}
                                                 />
                                                 <Text style={styles.permissionText}>{capitalizeWords(`${capturarTipoPermissao(permission.nome)} ${capturarAcaoPermissao(permission.nome)}`)}</Text>
                                                 {typeIcon(permission.nome)}
@@ -359,10 +434,19 @@ export default function RulesManagement() {
 
                                     )}
                                 </View>
+
+                                {session && (Number(session.userId) != Number(id)) && (
+                                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                        <TouchableOpacity style={styles.confirmButton} onPress={handleSubmit}>
+                                            <MaterialIcons name="rule" size={24} color={'#FFF'} style={styles.iconButton} />
+                                            <Text style={styles.confirmButtonText}>Atualizar Permissões</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
                             </BottomSheetView>
                         </BottomSheet>
                     )}
-
 
                 </View>
 
@@ -376,6 +460,27 @@ export default function RulesManagement() {
 const stylesTeste = (theme: IThemeMaximized) => {
 
     return StyleSheet.create({
+        center: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        confirmButton: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: theme.colors.primary,
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            borderRadius: 8,
+        },
+        iconButton: {
+            marginRight: 8,
+        },
+        confirmButtonText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
         ruleName: {
             fontSize: 20,
             fontWeight: 'bold',
@@ -404,7 +509,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         permissionText: {
             marginLeft: 8,
             fontSize: 16,
-            color: '#666',
+            color: theme.colors.text,
         },
         contentContainer: {
             flex: 1,

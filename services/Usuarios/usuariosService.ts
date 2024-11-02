@@ -332,6 +332,30 @@ export const updateById = async (
     }
 };
 
+const UpdateRolesAndPermissionsById = async (id: number, regras: number[], permissoes: number[]): Promise<void | Error> => {
+    try {
+        const { data } = await Api().patch(`/usuarios/autenticacao/${id}`, { regras: regras, permissoes: permissoes });
+
+        if (data.status == 204) {
+            return;
+        }
+
+        return new Error('Erro ao atualizar o registro.');
+    } catch (error) {
+
+        const errors = (error as IResponseErrosGeneric).response;
+
+        if (isAxiosError(error)) {
+            return error;
+        }
+
+        return new AxiosError(
+            errors?.data?.errors?.default || 'Erro ao consultar o registros.',
+            errors?.status || '500');
+
+    }
+};
+
 export const UsuariosService = {
     create,
     getAll,
@@ -341,5 +365,6 @@ export const UsuariosService = {
     updatePasswordById,
     recoverPassword,
     deleteFotoById,
-    updateById
+    updateById,
+    UpdateRolesAndPermissionsById
 };
