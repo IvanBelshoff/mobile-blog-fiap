@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Text, Share } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'; // Ícones do Expo
 import { DrawerHeaderProps } from '@react-navigation/drawer';
 import { Link, router } from 'expo-router';
@@ -8,10 +8,15 @@ import { useAppThemeContext } from '@/contexts/ThemeContext';
 import { Theme } from '@react-navigation/native';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function Header({ props, onSearch }: { props: DrawerHeaderProps, onSearch: (query: string) => void }) {
+interface RouteParams {
+  id?: number;
+}
+
+export default function Header({ props, onSearch }: { props: DrawerHeaderProps & { route: { params?: RouteParams } }, onSearch: (query: string) => void }) {
   // Estado para o texto do input
   const [searchQuery, setSearchQuery] = useState('');
 
+  
   // Função para limpar o input
   const clearSearch = () => {
     setSearchQuery(''); // Limpa o texto
@@ -23,6 +28,31 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
   const { DefaultTheme } = useAppThemeContext();
 
   const styles = stylesTeste(DefaultTheme);
+
+  const onShare = async (id: number) => {
+    try {
+      const url = `${Environment.WEB_URL}/${props.route.name.replace("[id]", String(id))}`;
+
+      const message = `Olá! Confira este conteúdo incrível! ${url}`;
+      const result = await Share.share({
+        message: message,
+        url: url,
+        title: 'Compartilhar Link'
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Compartilhado com atividade:', result.activityType);
+        } else {
+          console.log('Conteúdo compartilhado com sucesso!');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Compartilhamento cancelado.');
+      }
+    } catch (error: any) {
+      console.error('Erro ao compartilhar:', error);
+    }
+  };
+  
 
   return (
     <View
@@ -78,7 +108,12 @@ export default function Header({ props, onSearch }: { props: DrawerHeaderProps, 
               <Text style={styles.sectionTitle}>Minha Conta</Text>
             )}
             {props.route.name === 'posts/public/detail/[id]' && (
-              <Text style={styles.sectionTitle}>Post</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Text style={styles.sectionTitle}>Post</Text>
+                <TouchableOpacity onPress={() => onShare(props.route.params?.id || 0)}>
+                  <MaterialIcons name="share" size={24} color="#FFF" style={{ marginRight: 16 }} />
+                </TouchableOpacity>
+              </View>
             )}
             {props.route.name === 'posts/private/new/index' && (
               <Text style={styles.sectionTitle}>Novo Post</Text>
