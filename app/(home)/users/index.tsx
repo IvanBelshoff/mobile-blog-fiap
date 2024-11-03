@@ -177,6 +177,11 @@ export default function Users() {
                     setUsuarios(data);
                 }
             });
+
+            if (bottomSheetRef.current) {
+                bottomSheetRef.current.close();
+            }
+            
         }, [params.filter || params.page])
     );
 

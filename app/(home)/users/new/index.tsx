@@ -224,7 +224,7 @@ export default function NewUser() {
                 extraScrollHeight={100} // Ajuste extra para garantir que o botão fique visível
             >
 
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, paddingVertical: 16 }}>
                     {/* Imagem de perfil centralizada */}
                     <View style={styles.imageContainer}>
 
@@ -376,7 +376,7 @@ const stylesTeste = (theme: IThemeMaximized) => {
         container: {
             flex: 1,
             paddingHorizontal: 16,
-            paddingVertical: 16,
+            paddingVertical: 0,
             backgroundColor: theme.colors.background,
         },
         label: {
