@@ -1,8 +1,10 @@
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Image, TouchableOpacity, TextInput } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Environment } from "@/environment";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -75,6 +77,8 @@ export default function NewUser() {
 
     const styles = stylesTeste(DefaultTheme);
 
+    const router = useRouter()
+
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
     };
@@ -104,6 +108,9 @@ export default function NewUser() {
 
             } else {
                 Alert.alert("Sucesso", "Usuário criado com sucesso!");
+
+                router.push('/users')
+
                 setUserForm({
                     nome: undefined,
                     sobrenome: undefined,
@@ -211,6 +218,14 @@ export default function NewUser() {
             </View>
         );
     }
+
+    useFocusEffect(
+        useCallback(() => {
+          return () => {
+            resetForm();
+          };
+        }, [])
+      );
 
     return (
         <KeyboardAvoidingView

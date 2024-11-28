@@ -3,7 +3,7 @@ import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { AxiosError } from "axios";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, KeyboardAvoidingView, Image, TouchableOpacity, TextInput, Platform, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -83,6 +83,8 @@ export default function DetailUser() {
 
     const styles = stylesTeste(DefaultTheme);
 
+    const router = useRouter()
+
     const fetchUser = async () => {
 
         try {
@@ -158,7 +160,9 @@ export default function DetailUser() {
                 });
 
             } else {
-                Alert.alert("Sucesso", "Usuário criado com sucesso!");
+                Alert.alert("Sucesso", "Usuário atualizado com sucesso!");
+                
+                router.push('/users')
 
                 await fetchUser().then(() => {
                     setSelectedImage(null);

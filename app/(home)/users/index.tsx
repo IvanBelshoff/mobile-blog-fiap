@@ -63,7 +63,7 @@ export default function Users() {
                 Alert.alert("Sucesso", "Usuário excluido com sucesso!");
                 setUserOptions(null);
                 flatListRef.current?.scrollToOffset({ offset: 0 });
-                fetchData(params.page || '1', params.filter).then((data) => {
+                fetchData(page.toString() || '1', params.filter).then((data) => {
                     if (data instanceof AxiosError) {
                         setError(data.message);
 
@@ -104,7 +104,7 @@ export default function Users() {
 
     const loadMoreData = () => {
 
-        fetchData(params.page || '1', params.filter).then((data) => {
+        fetchData(page.toString(), params.filter).then((data) => {
 
             if (data instanceof AxiosError) {
 
@@ -128,7 +128,7 @@ export default function Users() {
 
     useEffect(() => {
 
-        if (page !== parseInt(params.page || '1')) {
+        if (page !== parseInt(page.toString() || '1')) {
 
             router.setParams({ page: page.toString() });
 
@@ -162,14 +162,14 @@ export default function Users() {
 
     useFocusEffect(
         useCallback(() => {
-            if ((params.page) && (parseInt(params.page) == 1 && page > 1)) {
+            if ((page.toString()) && (parseInt(page.toString()) == 1 && page > 1)) {
 
-                setPage(parseInt(params.page));
+                setPage(parseInt(page.toString()));
                 flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
 
             }
 
-            fetchData(params.page || '1', params.filter).then((data) => {
+            fetchData(page.toString() || '1', params.filter).then((data) => {
                 if (data instanceof AxiosError) {
                     setError(data.message);
 
@@ -182,7 +182,7 @@ export default function Users() {
                 bottomSheetRef.current.close();
             }
             
-        }, [params.filter || params.page])
+        }, [params.filter || page.toString()])
     );
 
     const bottomSheetRef = useRef<BottomSheet>(null);
