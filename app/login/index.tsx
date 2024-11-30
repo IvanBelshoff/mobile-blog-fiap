@@ -57,7 +57,8 @@ export default function Login() {
             if (response instanceof Error) {
                 throw response;
             } else {
-                setLogin(false);
+                Alert.alert("Sucesso", "Email enviado com sucesso.");
+                setLogin(true);
                 setEmail('');
             }
 

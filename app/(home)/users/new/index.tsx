@@ -1,8 +1,7 @@
 import { useAppThemeContext } from "@/contexts/ThemeContext";
 import { UsuariosService } from "@/services/Usuarios/usuariosService";
 import { AxiosError } from "axios";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Image, TouchableOpacity, TextInput } from "react-native";
 import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,6 +9,7 @@ import { Environment } from "@/environment";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { IThemeMaximized } from "@/globalInterfaces/interfaces";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface IUserForm {
     nome?: string;
@@ -218,14 +218,6 @@ export default function NewUser() {
             </View>
         );
     }
-
-    useFocusEffect(
-        useCallback(() => {
-          return () => {
-            resetForm();
-          };
-        }, [])
-      );
 
     return (
         <KeyboardAvoidingView
